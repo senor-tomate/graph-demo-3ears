@@ -1,7 +1,6 @@
 // Container.js
 
 import React from 'react';
-import Plot  from 'react-plotly.js';
 
 export default
 class Container extends React.Component
@@ -11,10 +10,8 @@ class Container extends React.Component
         super(props)
         this.id = props.id;
         this.db = props.db;
-        // this.dbLink = (db!=null) ?
-        //               new SQL.Da
-        // this.wordCount = 
-        this.wordCount = 1000
+        this.wordCount = (this.db == null) ? 0 : Object.keys(this.db).length;
+        console.log(this.wordCount);
     }
 
     render()
