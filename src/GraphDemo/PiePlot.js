@@ -5,7 +5,7 @@ import Container from './Container';
 import Plot from 'react-plotly.js';
 
 import Slider from '@material-ui/core/Slider';
-import Switch from '@material-ui/core/Switch';
+import Checkbox from '@material-ui/core/Checkbox';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 
@@ -119,7 +119,6 @@ class PiePlotDemo extends Container
                     break;
             }
         }
-        console.log(data);
         return data;
     }
 
@@ -136,19 +135,20 @@ class PiePlotDemo extends Container
 
     handleSliderChange(event, newVal)
     {
-        this.setState( {range: newVal} );
+        this.setState( { range: newVal } );
         this.setState( { graphData: this.getGraphData() } );
     }
 
     handleSwitchChange(event, checked, type)
     {
-        this.setState( { [type] : checked} );
+        console.log("SWITCH STATE @ " + type + " changed to " + checked);
+        this.state[type] = checked;
         console.log(this.state);
         this.setState( { graphData: this.getGraphData() } );
     }
 
     // Stolen from [https://material-ui.com/components/switches/] 
-    // (Switch with FormControlLabel)
+    // (Checkbox with FormControlLabel)
     switches()
     {
         let state = this.state;
@@ -156,7 +156,7 @@ class PiePlotDemo extends Container
             <FormGroup row>
                 <FormControlLabel
                     control={
-                        <Switch 
+                        <Checkbox 
                             checked={state.adj} 
                             onChange={ (event, newCheck) => 
                                     this.handleSwitchChange(event, newCheck, 'adj') 
@@ -168,7 +168,7 @@ class PiePlotDemo extends Container
                 />
                 <FormControlLabel
                     control={
-                        <Switch
+                        <Checkbox
                         checked={state.adjpron}
                         onChange={ (event, newCheck) => 
                             this.handleSwitchChange(event, newCheck, 'adjpron')
@@ -180,7 +180,7 @@ class PiePlotDemo extends Container
                 />
                 <FormControlLabel
                     control={
-                        <Switch 
+                        <Checkbox 
                             checked={state.noun} 
                             onChange={ (event, newCheck) => 
                                     this.handleSwitchChange(event, newCheck, 'noun') 
@@ -192,7 +192,7 @@ class PiePlotDemo extends Container
                 />
                 <FormControlLabel
                     control={
-                        <Switch 
+                        <Checkbox 
                             checked={state.verb} 
                             onChange={ (event, newCheck) => 
                                     this.handleSwitchChange(event, newCheck, 'verb') 
@@ -204,7 +204,7 @@ class PiePlotDemo extends Container
                 />
                 <FormControlLabel
                     control={
-                        <Switch 
+                        <Checkbox 
                             checked={state.pron} 
                             onChange={ (event, newCheck) => 
                                     this.handleSwitchChange(event, newCheck, 'pron') 
@@ -216,7 +216,7 @@ class PiePlotDemo extends Container
                 />
                 <FormControlLabel
                     control={
-                        <Switch 
+                        <Checkbox 
                             checked={state.prep} 
                             onChange={ (event, newCheck) => 
                                     this.handleSwitchChange(event, newCheck, 'prep') 
@@ -228,7 +228,7 @@ class PiePlotDemo extends Container
                 />
                 <FormControlLabel
                     control={
-                        <Switch 
+                        <Checkbox 
                             checked={state.misc} 
                             onChange={ (event, newCheck) => 
                                     this.handleSwitchChange(event, newCheck, 'misc') 
@@ -240,7 +240,7 @@ class PiePlotDemo extends Container
                 />
                 <FormControlLabel
                     control={
-                        <Switch 
+                        <Checkbox 
                             checked={state.adv} 
                             onChange={ (event, newCheck) => 
                                     this.handleSwitchChange(event, newCheck, 'adv') 
@@ -252,7 +252,7 @@ class PiePlotDemo extends Container
                 />
                 <FormControlLabel
                     control={
-                        <Switch 
+                        <Checkbox 
                             checked={state.ord} 
                             onChange={ (event, newCheck) => 
                                     this.handleSwitchChange(event, newCheck, 'ord') 
@@ -264,7 +264,7 @@ class PiePlotDemo extends Container
                 />
                 <FormControlLabel
                     control={
-                        <Switch 
+                        <Checkbox 
                             checked={state.card} 
                             onChange={ (event, newCheck) => 
                                     this.handleSwitchChange(event, newCheck, 'card') 
