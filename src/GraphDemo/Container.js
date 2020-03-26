@@ -1,6 +1,7 @@
 // Container.js
 
 import React from 'react';
+var assert = require('assert');
 
 export default
 class Container extends React.Component
@@ -9,9 +10,22 @@ class Container extends React.Component
     {
         super(props)
         this.id = props.id;
-        this.db = props.db;
-        this.wordCount = (this.db == null) ? 0 : Object.keys(this.db).length;
-        console.log(this.wordCount);
+        console.log(this.id);
+        this.db = JSON.parse(JSON.stringify(props.db));
+        // this.wordCount = (this.db == null) ? 0 : Object.keys(this.db).length;
+        this.wordCount = (this.db == null) ? 0 : this.db.length;
+        this.knownWords = props.knownWords;
+        console.log(this.knownWords);
+
+        for (let i = 0; i < this.wordCount; ++i) {
+            if ( !this.knownWords.includes(this.db[i].lemma) ) {
+                this.db[i]["known"] = false;
+            }
+            else {
+                this.db[i]["known"] = true;
+            }
+        }   
+        console.log(this.db);
     }
 
     render()
