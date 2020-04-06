@@ -9,21 +9,37 @@ import Checkbox from '@material-ui/core/Checkbox';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 
-const styles = {
-    switch: {
-        padding: '0 30px',
-    },
-    slider: {
-        padding: "30px"
-    }
-};
+import MASTER_DB from '../../data/_lemma_MASTER3.json';
 
 export default 
 class PiePlotDemo extends Container
 {
+    /**
+     * @brief Constructor.
+     * 
+     * @param {*} props.db - Database, can be null.
+     * @param {*} props.knownWords - Array of known word strings. Not copied into object.
+     */
     constructor(props)
     {
         super(props);
+        
+        if (props.db != null) 
+            this.db = JSON.parse(JSON.stringify(props.db));
+        else
+            this.db = JSON.parse(JSON.stringify(MASTER_DB));
+        this.wordCount = this.db.length;
+
+        this.knownWords = props.knownWords;
+        for (let i = 0; i < this.wordCount; ++i) {
+            if ( !this.knownWords.includes(this.db[i].lemma) ) {
+                this.db[i]["known"] = false;
+            }
+            else {
+                this.db[i]["known"] = true;
+            }
+        }   
+
         this.state = {
             range: [1, this.wordCount],       // Range of words to show.
             adj : true,
@@ -43,6 +59,11 @@ class PiePlotDemo extends Container
         window.addEventListener('resize', (ev) => this.handleGraphSizeChange(ev) )
     }
 
+    /**
+     * @brief Returns graph data according to settings set in this object.
+     * 
+     * Generally used only with @code this.graphData=this.getGraphData(); @endcode
+     */
     getGraphData()
     {
         let data = {adj: 0, uadj: 0,
@@ -57,10 +78,8 @@ class PiePlotDemo extends Container
                     misc: 0, umisc: 0
         };
         for (const entry of this.db) {
-            // console.log(entry);
-            //If not in selected range
+            // If not in selected range
             if (!(entry.rank>=this.state.range[0] && entry.rank<=this.state.range[1])) {
-                //console.log(entry.lemma + " out of range");
                 continue;
             }
             switch (entry.wtype) {
@@ -122,33 +141,57 @@ class PiePlotDemo extends Container
         return data;
     }
 
+    /**
+     * @brief Returns size of graph according to window size.
+     * 
+     * Should be changed later to accomodate for css and such.
+     */
     getGraphSize()
     {
         return (window.innerWidth <= window.innerHeight) ? 
         window.innerWidth-30 : window.innerHeight-30;
     }
 
+    /**
+     * @brief Callback to change size of component.
+     * 
+     * @param {*} ev 
+     */
     handleGraphSizeChange(ev)
     {
         this.setState( { graphDims: this.getGraphSize() } );
     }
 
+    /**
+     * @brief Callback to change target word range according to slider.
+     * 
+     * @param {*} event  - ???
+     * @param {*} newVal - Array with 2 integers, low then high.
+     */
     handleSliderChange(event, newVal)
     {
         this.setState( { range: newVal } );
         this.setState( { graphData: this.getGraphData() } );
     }
 
+    /**
+     * @brief Callback to switch word types on or off according to switches.
+     * 
+     * @param {*} event   - ???
+     * @param {*} checked - Boolean to signify whether word type is turned on.
+     * @param {*} type    - Word type to turn on or off.
+     */
     handleSwitchChange(event, checked, type)
     {
-        console.log("SWITCH STATE @ " + type + " changed to " + checked);
+        // console.log("SWITCH STATE @ " + type + " changed to " + checked);
         this.state[type] = checked;
         console.log(this.state);
         this.setState( { graphData: this.getGraphData() } );
     }
 
-    // Stolen from [https://material-ui.com/components/switches/] 
-    // (Checkbox with FormControlLabel)
+    /**
+     * @brief Return html for the switch rendering.
+     */
     switches()
     {
         let state = this.state;
@@ -278,6 +321,9 @@ class PiePlotDemo extends Container
         );
     }
 
+    /**
+     * @brief Renders component.
+     */
     render()
     {
         let colors = [
@@ -286,7 +332,7 @@ class PiePlotDemo extends Container
         ];
         let gd = this.state.graphData;
         let data = [{
-            labels: ["Adjectives", "Nouns", "Verbs", "Pronouns", "Adjective Pronouns", "Prepositions", 
+        labels: ["Adjectives", "Nouns", "Verbs", "Pronouns", "Adjective Pronouns", "Prepositions", 
                      "Adverbs", "Ordinals", "Cardinals", "Other", "Unknown Adjectives", "Unknown Nouns", "Unknown Verbs", 
                      "Unknown Pronouns", "Unknown Adjective Pronouns", "Unknown Prepositions", 
                      "Unknown Adverbs", "Unknown Ordinals", "Unknown Cardinals", "Unknown Other"],

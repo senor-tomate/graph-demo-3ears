@@ -1,6 +1,6 @@
 # GRAPH DEMO FOR WORD FREQ LISTS (3EARS)
 
-This is self-explanatory, I think.
+Package with graphs for 3ears stats page. Main entry is index.js, all classes are exported from there.
 
 
 ### Notes:

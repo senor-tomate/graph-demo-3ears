@@ -2,7 +2,7 @@
 
 import React from 'react';
 import GraphContainer from './GraphDemo/Container.js'
-import PiePlot from './GraphDemo/PiePlot.js';
+import PiePlot from './GraphDemo/FrequentWordsPiePlot.js';
 
 import MASTER from '../data/_lemma_MASTER3.json'
 
