@@ -1,7 +1,6 @@
 // Container.js
 
 import React from 'react';
-var assert = require('assert');
 
 export default
 class Container extends React.Component
