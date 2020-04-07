@@ -9,6 +9,7 @@ import MASTER from '../data/_lemma_MASTER3.json'
 export default 
 function GraphDemo()
 {
+    console.log("balablaa");
     return (
         <div className='GraphDemo'>
             {/* <GraphContainer db={null} id='0'/> */}

@@ -41,7 +41,7 @@ class PiePlotDemo extends Container
         }   
 
         this.state = {
-            range: [1, this.wordCount],       // Range of words to show.
+            range: [0, 100],       // Range of words to show.
             adj : true,
             adjpron: true,
             noun: true,
@@ -77,9 +77,15 @@ class PiePlotDemo extends Container
                     card: 0, ucard: 0,
                     misc: 0, umisc: 0
         };
+        console.log(this.state.range);
+        let range = [this.sliderScaleFunction(this.state.range[0]), 
+                     this.sliderScaleFunction(this.state.range[1])
+                    ];
+        console.log(range);
+        console.log(this.wordCount);
         for (const entry of this.db) {
             // If not in selected range
-            if (!(entry.rank>=this.state.range[0] && entry.rank<=this.state.range[1])) {
+            if (!(entry.rank>=range[0] && entry.rank<=range[1])) {
                 continue;
             }
             switch (entry.wtype) {
@@ -138,7 +144,18 @@ class PiePlotDemo extends Container
                     break;
             }
         }
+        console.log(data);
         return data;
+    }
+
+    /**
+     * @brief Scaler function for slider.
+     * @param {*} x - integers to scale.
+     */
+    sliderScaleFunction(x)
+    {
+        let ret = Math.floor(this.wordCount ** Math.pow(x/100.0, 2/5));
+        return ret;
     }
 
     /**
@@ -326,6 +343,7 @@ class PiePlotDemo extends Container
      */
     render()
     {
+        console.log(this.state.range);
         let colors = [
             '#f04060', '#f0a040', '#e0e030', '#30e040', '#30e0e0', '#3040e0', '#b030e0',
             '#f3647e', '#f3b264', '#efef96', '#96ef9e', '#96efef', '#969eef', '#d796ef'
@@ -358,16 +376,17 @@ class PiePlotDemo extends Container
                     data = {data}
                     layout={GraphLayout}
                 />
-                <div style={styles.slider} className='Slider'>
+                <div className='Slider'>
                     <Slider 
-                        min={1}
-                        max={this.wordCount}
+                        min={0}
+                        max={100}
+                        scale={ (disp) => this.sliderScaleFunction(disp) }
                         value={this.state.range} 
                         onChange= { (event, newVal) => this.handleSliderChange(event, newVal) } 
                         valueLabelDisplay="on"
                     />
                 </div>
-                <div style={styles.switch} className='Switches'>
+                <div className='Switches'>
                     { this.switches() }
                 </div>
             </div>
