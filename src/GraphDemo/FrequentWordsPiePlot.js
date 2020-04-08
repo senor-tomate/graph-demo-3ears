@@ -11,6 +11,10 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 
 import MASTER_DB from '../../data/_lemma_MASTER3.json';
 
+let MAX_SLIDER_NUMBER = 5000;
+let MIN_SLIDER_NUMBER = 0;
+let SLIDER_LOG_BASE   = 1/3;
+
 export default 
 class PiePlotDemo extends Container
 {
@@ -41,7 +45,7 @@ class PiePlotDemo extends Container
         }   
 
         this.state = {
-            range: [0, 100],       // Range of words to show.
+            range: [MIN_SLIDER_NUMBER, MAX_SLIDER_NUMBER],
             adj : true,
             adjpron: true,
             noun: true,
@@ -77,12 +81,10 @@ class PiePlotDemo extends Container
                     card: 0, ucard: 0,
                     misc: 0, umisc: 0
         };
-        console.log(this.state.range);
         let range = [this.sliderScaleFunction(this.state.range[0]), 
                      this.sliderScaleFunction(this.state.range[1])
                     ];
-        console.log(range);
-        console.log(this.wordCount);
+
         for (const entry of this.db) {
             // If not in selected range
             if (!(entry.rank>=range[0] && entry.rank<=range[1])) {
@@ -144,7 +146,6 @@ class PiePlotDemo extends Container
                     break;
             }
         }
-        console.log(data);
         return data;
     }
 
@@ -154,7 +155,7 @@ class PiePlotDemo extends Container
      */
     sliderScaleFunction(x)
     {
-        let ret = Math.floor(this.wordCount ** Math.pow(x/100.0, 2/5));
+        let ret = Math.floor(this.wordCount ** Math.pow(x/MAX_SLIDER_NUMBER, SLIDER_LOG_BASE));
         return ret;
     }
 
@@ -200,9 +201,7 @@ class PiePlotDemo extends Container
      */
     handleSwitchChange(event, checked, type)
     {
-        // console.log("SWITCH STATE @ " + type + " changed to " + checked);
         this.state[type] = checked;
-        console.log(this.state);
         this.setState( { graphData: this.getGraphData() } );
     }
 
@@ -343,7 +342,6 @@ class PiePlotDemo extends Container
      */
     render()
     {
-        console.log(this.state.range);
         let colors = [
             '#f04060', '#f0a040', '#e0e030', '#30e040', '#30e0e0', '#3040e0', '#b030e0',
             '#f3647e', '#f3b264', '#efef96', '#96ef9e', '#96efef', '#969eef', '#d796ef'
@@ -378,8 +376,8 @@ class PiePlotDemo extends Container
                 />
                 <div className='Slider'>
                     <Slider 
-                        min={0}
-                        max={100}
+                        min={MIN_SLIDER_NUMBER}
+                        max={MAX_SLIDER_NUMBER}
                         scale={ (disp) => this.sliderScaleFunction(disp) }
                         value={this.state.range} 
                         onChange= { (event, newVal) => this.handleSliderChange(event, newVal) } 
