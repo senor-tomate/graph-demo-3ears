@@ -1,0 +1,37 @@
+/* FrequentWordsPiePlot.css */
+
+.FrequentWordsPiePlot {
+    display: grid;
+    grid-template-columns: .5% max(400px, 37.5%) 12.5%;
+    grid-template-rows: 16.67% max(400px, 66.66%) 16.67%;
+    /* grid-template-columns: 533px 400px 133px;
+    grid-template-rows: 100px, 400px, 100px; */
+    grid-template-areas: 
+        "header .      .  "
+        "total  plot   checkboxes"
+        "total  slider .";
+}
+
+.PiePlot {
+    grid-area: plot;
+    align-self: center;
+    justify-self: center;
+}
+
+.Slider {
+    grid-area: slider;
+}
+
+.Checkboxes {
+    grid-area: checkboxes;
+}
+
+.Header {
+    grid-area: header;
+    color: "white";
+    padding: "10px";
+}
+
+.Total {
+    grid-area: total;
+}

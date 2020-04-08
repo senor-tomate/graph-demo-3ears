@@ -22,6 +22,16 @@ module.exports = {
                     loader: "babel-loader"
                 }
             },
+            {
+                test: /\.css$/i,
+                // enforce: "pre",
+                // exclude: /node_modules/, // exclude any and all files in the node_modules folder
+                // include: [path.join(__dirname, 'src')],
+                // use: {
+                //     loader: "css-loader"
+                // },
+                use: [ "style-loader", "css-loader",]
+            },
         ]
     },
 }

@@ -1,4 +1,4 @@
-// PiePlot.js 
+// FrequentWordsPiePlot.js
 
 import React from 'react'
 import Container from './Container';
@@ -11,9 +11,11 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 
 import MASTER_DB from '../../data/_lemma_MASTER3.json';
 
+import './FrequentWordsPiePlot.css';
+
 let MAX_SLIDER_NUMBER = 5000;
 let MIN_SLIDER_NUMBER = 0;
-let SLIDER_LOG_BASE   = 1/3;
+let SLIDER_LOG_BASE   = 1.0/3.0;
 
 export default 
 class PiePlotDemo extends Container
@@ -166,8 +168,9 @@ class PiePlotDemo extends Container
      */
     getGraphSize()
     {
-        return (window.innerWidth <= window.innerHeight) ? 
-        window.innerWidth-30 : window.innerHeight-30;
+        // return (window.innerWidth <= window.innerHeight) ? 
+        // window.innerWidth-30 : window.innerHeight-30;
+        return 400;
     }
 
     /**
@@ -363,17 +366,25 @@ class PiePlotDemo extends Container
         }];
         
         let GraphLayout = {
-            width: this.state.graphDims,
-            height: this.state.graphDims,
+            width: {flex:1 },
+            height: {flex: 1},
             title: 'The Words',
             showlegend: false,
         }
         return ( 
-            <div className='PiePlot'>
-                <Plot
-                    data = {data}
-                    layout={GraphLayout}
-                />
+            <div className='FrequentWordsPiePlot'>
+                <h1 className = 'Header'>
+                    Most Frequent Known Words
+                </h1>
+                <h1 className = 'Total'>
+                    UNDER CONSTRUCTION
+                </h1>
+                <div className = 'PiePlot'>
+                    <Plot
+                        data = {data}
+                        layout={GraphLayout}
+                    />
+                </div>
                 <div className='Slider'>
                     <Slider 
                         min={MIN_SLIDER_NUMBER}
@@ -384,7 +395,7 @@ class PiePlotDemo extends Container
                         valueLabelDisplay="on"
                     />
                 </div>
-                <div className='Switches'>
+                <div className='Checkboxes'>
                     { this.switches() }
                 </div>
             </div>
