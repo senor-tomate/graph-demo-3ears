@@ -29,5 +29,6 @@
     "scripts": {
         "start": "webpack-dev-server --hot --inline --config webpack.config.js",
         "build": "webpack"
-    }
+    },
+    "files": ["build/"]
 }
