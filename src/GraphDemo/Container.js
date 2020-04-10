@@ -7,12 +7,12 @@ class Container extends React.Component
 {
     /**
      * @breif Constructor
-     * @param {*} props.id - ID for this graph. 
+     * @param {*} props.id - ID number for this graph. 
      */
     constructor(props)
     {
         super(props)
-        this.id = props.id;
+        this.id = 'Graph_'+props.id;
         console.log(this.id);
     }
 

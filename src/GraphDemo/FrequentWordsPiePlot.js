@@ -168,9 +168,13 @@ class PiePlotDemo extends Container
      */
     getGraphSize()
     {
-        // return (window.innerWidth <= window.innerHeight) ? 
-        // window.innerWidth-30 : window.innerHeight-30;
-        return 400;
+        return (window.innerWidth <= window.innerHeight) ? 
+        window.innerWidth-30 : window.innerHeight-30;
+
+        // let ret = Math.min($('PiePlot').width, $('PiePlot').height);
+        // return ret;
+
+        // return 400;
     }
 
     /**
@@ -180,7 +184,7 @@ class PiePlotDemo extends Container
      */
     handleGraphSizeChange(ev)
     {
-        this.setState( { graphDims: this.getGraphSize() } );
+        // this.setState( { graphDims: this.getGraphSize() } );
     }
 
     /**
@@ -366,24 +370,98 @@ class PiePlotDemo extends Container
         }];
         
         let GraphLayout = {
-            width: {flex:1 },
-            height: {flex: 1},
-            title: 'The Words',
+            // width: {flex:1 },
+            // height: {flex: 1},
+            // title: 'The Words',
             showlegend: false,
         }
         return ( 
-            <div className='FrequentWordsPiePlot'>
+        <div>
+            {/* <div class="grid">
+                <div class="grid__item">
+                    <div class="content">
+                    <div class="content-inside">
+                        <h2>2:1</h2>
+                        <p>Centered</p>
+                    </div>
+                    </div>
+                </div>
+                <div class="grid__item">
+                    <div class="content">
+                    <div class="content-inside">
+                        <h2>1:1</h2>
+                        <p>Lower Left</p>
+                    </div>
+                    </div>
+                </div>
+                <div class="grid__item">
+                    <div class="content">
+                    <div class="content-inside">
+                        <h2>1:1</h2>
+                        <p>Lower Left</p>
+                    </div>
+                    </div>
+                </div>
+                <div class="grid__item">
+                    <div class="content">
+                    <div class="content-inside">
+                        <h2>1:1</h2>
+                        <p>Lower Left</p>
+                    </div>
+                    </div>
+                </div>
+                <div class="grid__item">
+                    <div class="content content-lr">
+                    <div class="content-inside">
+                        <h2>1:1</h2>
+                        <p>Lower Right</p>
+                    </div>
+                    </div>
+                </div>
+            </div> */}
+
+            <div class="container">
+                <div>
+                    <h1>a</h1>
+                </div>
+                <div>
+                    <h1>a</h1>
+                </div><div>
+                    <h1>a</h1>
+                </div><div>
+                    <h1>a</h1>
+                </div><div>
+                    <h1>a</h1>
+                </div><div>
+                    <h1>a</h1>
+                </div><div>
+                    <h1>a</h1>
+                </div>
+                <div><h1>a</h1></div>
+                <div><h1>a</h1></div>
+                <div><h1>a</h1></div>
+                <div><h1>a</h1></div>
+                <div><h1>a</h1></div>
+                <div><h1>a</h1></div>
+                <div><h1>a</h1></div>
+            </div>
+
+            {/* <div className='FrequentWordsPiePlot'>
                 <h1 className = 'Header'>
-                    Most Frequent Known Words
+                    A
                 </h1>
                 <h1 className = 'Total'>
-                    UNDER CONSTRUCTION
+                    T
                 </h1>
-                <div className = 'PiePlot'>
-                    <Plot
+                <div className = 'PiePlotContainer' id={this.id+'_PiePlot'}>
+                    {/* <Plot
                         data = {data}
                         layout={GraphLayout}
-                    />
+                        className='PiePlot'
+                    /> */}
+                    {/* <h1 className='PiePlot'>
+                        G
+                    </h1>
                 </div>
                 <div className='Slider'>
                     <Slider 
@@ -398,7 +476,10 @@ class PiePlotDemo extends Container
                 <div className='Checkboxes'>
                     { this.switches() }
                 </div>
-            </div>
+            </div> */}
+        </div>
+
+
         );
     }
 

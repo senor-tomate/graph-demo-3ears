@@ -2,36 +2,149 @@
 
 .FrequentWordsPiePlot {
     display: grid;
-    grid-template-columns: .5% max(400px, 37.5%) 12.5%;
-    grid-template-rows: 16.67% max(400px, 66.66%) 16.67%;
-    /* grid-template-columns: 533px 400px 133px;
-    grid-template-rows: 100px, 400px, 100px; */
+    grid-template-columns: 50% 37.5% 12.5%;
+    grid-template-rows: 16.67% 66.66% 16.67%;
     grid-template-areas: 
         "header .      .  "
-        "total  plot   checkboxes"
+        "total  plot-container   checkboxes"
         "total  slider .";
+    /* width:  minmax(600px, 100%);
+    height: minmax(400px, 100%); */
+    /* min-height: 400px;
+    min-width:  600px; */
+    /* padding-bottom: 33%; */
+}
+
+.PiePlotContainer {
+    grid-area: plot-container;
+    background: #004182;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    display: grid;
+    justify-items: start;
+    align-items: end;
+    /* padding-top: 100%; */
+    /* position: relative; */
 }
 
 .PiePlot {
+    width: 100%;
+    padding-top: 50%;
+    padding-bottom: 50%;
     grid-area: plot;
-    align-self: center;
-    justify-self: center;
 }
 
 .Slider {
+    width: 100%;
     grid-area: slider;
 }
 
 .Checkboxes {
+    width: 100%;
     grid-area: checkboxes;
+    align-self: center;
+    justify-self: center;
 }
 
 .Header {
+    width: 100%;
     grid-area: header;
     color: "white";
     padding: "10px";
 }
 
 .Total {
+    width: 100%;
     grid-area: total;
+    align-self: center;
+    justify-self: center;
 }
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~` */
+
+* {
+  box-sizing: border-box;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.grid__item {
+  position: relative;
+  width: 100%;
+  border: 1px solid #ccc;
+}
+.grid__item:nth-child(1) {
+  grid-column: 1 / 3;
+}
+.grid__item:nth-child(1)::before {
+  padding-top: 50%;
+}
+.grid__item:nth-child(1) .content {
+  -webkit-box-align: center;
+          align-items: center;
+  justify-items: center;
+  text-align: center;
+}
+.grid__item:nth-child(2) {
+  grid-column: 3 / 4;
+  justify-self: center;
+}
+.grid__item:nth-child(3) {
+  grid-column: 1 / 2;
+}
+.grid__item:nth-child(4) {
+  grid-column: 2 / 3;
+}
+.grid__item:nth-child(5) {
+  grid-column: 3 / 4;
+}
+.grid__item:before {
+  content: "";
+  height: 0;
+  display: inline-block;
+  padding-top: 100%;
+  width: 1px;
+  position: relative;
+}
+.grid__item .content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  display: grid;
+  justify-items: start;
+  -webkit-box-align: end;
+          align-items: end;
+}
+.grid__item .content-lr {
+  place-items: end end;
+  text-align: right;
+}
+.grid__item .content-inside {
+  padding: 2rem;
+}
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+.container {
+    display: grid;
+    height: calc(50vw - 5px);  /*instead playing around with grid gap gap */
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    min-height: 200px;
+    min-width: 400px;
+  }
+  
+  .container div {
+    /* bg to show i'm squarred or not ? */
+    background-image: linear-gradient( 45deg, transparent 50%, rgba(0, 0, 0, 0.5) 50%);
+   
+   margin: 0 5px 5px 0;  /*instead playing around with grid gap gap */
+    background-color: red;
+  }
