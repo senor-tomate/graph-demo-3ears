@@ -377,7 +377,7 @@ class PiePlotDemo extends Container
         }
         return ( 
         <div>
-            {/* <div class="grid">
+            <div class="grid">
                 <div class="grid__item">
                     <div class="content">
                     <div class="content-inside">
@@ -418,35 +418,36 @@ class PiePlotDemo extends Container
                     </div>
                     </div>
                 </div>
-            </div> */}
-
-            <div class="container">
-                <div>
-                    <h1>a</h1>
-                </div>
-                <div>
-                    <h1>a</h1>
-                </div><div>
-                    <h1>a</h1>
-                </div><div>
-                    <h1>a</h1>
-                </div><div>
-                    <h1>a</h1>
-                </div><div>
-                    <h1>a</h1>
-                </div><div>
-                    <h1>a</h1>
-                </div>
-                <div><h1>a</h1></div>
-                <div><h1>a</h1></div>
-                <div><h1>a</h1></div>
-                <div><h1>a</h1></div>
-                <div><h1>a</h1></div>
-                <div><h1>a</h1></div>
-                <div><h1>a</h1></div>
             </div>
 
-            {/* <div className='FrequentWordsPiePlot'>
+            {/* <div class="container">
+                <div>
+                    <h1>a</h1>
+                </div>
+                <div>
+                    <h1>a</h1>
+                </div><div>
+                    <h1>a</h1>
+                </div><div>
+                    <h1>a</h1>
+                </div><div>
+                    <h1>a</h1>
+                </div><div>
+                    <h1>a</h1>
+                </div><div>
+                    <h1>a</h1>
+                </div>
+                <div><h1>a</h1></div>
+                <div><h1>a</h1></div>
+                <div><h1>a</h1></div>
+                <div><h1>a</h1></div>
+                <div><h1>a</h1></div>
+                <div><h1>a</h1></div>
+                <div><h1>a</h1></div>
+            </div> */}
+
+            {/* <div className = "breaker">
+            <div className='FrequentWordsPiePlot'>
                 <h1 className = 'Header'>
                     A
                 </h1>
@@ -454,14 +455,11 @@ class PiePlotDemo extends Container
                     T
                 </h1>
                 <div className = 'PiePlotContainer' id={this.id+'_PiePlot'}>
-                    {/* <Plot
+                    <Plot
                         data = {data}
                         layout={GraphLayout}
                         className='PiePlot'
-                    /> */}
-                    {/* <h1 className='PiePlot'>
-                        G
-                    </h1>
+                    />
                 </div>
                 <div className='Slider'>
                     <Slider 
@@ -476,7 +474,8 @@ class PiePlotDemo extends Container
                 <div className='Checkboxes'>
                     { this.switches() }
                 </div>
-            </div> */}
+            </div>
+            </div>  */}
         </div>
 
 

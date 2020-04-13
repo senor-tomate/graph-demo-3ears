@@ -1,9 +1,17 @@
 /* FrequentWordsPiePlot.css */
 
+.breaker {
+    max-height: 800px;
+    max-width: 600px;
+
+}
+
 .FrequentWordsPiePlot {
     display: grid;
-    grid-template-columns: 50% 37.5% 12.5%;
-    grid-template-rows: 16.67% 66.66% 16.67%;
+    /* grid-template-columns: 37.5% 50% 12.5%;
+    grid-template-rows: 16.67% 66.66% 16.67%; */
+    grid-template-columns: 3fr 4fr 1fr;
+    grid-template-rows: 1fr 4fr 1fr;
     grid-template-areas: 
         "header .      .  "
         "total  plot-container   checkboxes"
@@ -17,21 +25,24 @@
 
 .PiePlotContainer {
     grid-area: plot-container;
-    background: #004182;
-    position: absolute;
+    /* background: #004182; */
+    /* position: absolute; */
     top: 0;
     left: 0;
     bottom: 0;
-    width: 100%;
+    width: 400px;
+    height: 400px;
     display: grid;
-    justify-items: start;
-    align-items: end;
+    /* justify-items: start; */
+    /* align-items: end; */
+    grid-template-areas: "plot";
     /* padding-top: 100%; */
     /* position: relative; */
 }
 
 .PiePlot {
-    width: 100%;
+    width: 400px;
+    height: 400px;
     padding-top: 50%;
     padding-bottom: 50%;
     grid-area: plot;
@@ -83,7 +94,7 @@
   grid-column: 1 / 3;
 }
 .grid__item:nth-child(1)::before {
-  padding-top: 50%;
+  /* padding-top: 50%; */
 }
 .grid__item:nth-child(1) .content {
   -webkit-box-align: center;
@@ -108,8 +119,8 @@
   content: "";
   height: 0;
   display: inline-block;
-  padding-top: 100%;
-  width: 1px;
+  /* padding-top: 100%; */
+  width: 10px;
   position: relative;
 }
 .grid__item .content {
@@ -128,7 +139,7 @@
   text-align: right;
 }
 .grid__item .content-inside {
-  padding: 2rem;
+ /* padding: 2rem; */
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
