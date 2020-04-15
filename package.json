@@ -1,7 +1,7 @@
 {
     "name": "graph-demo-3ears",
-    "version": "0.0.2",
-    "main": "index.js",
+    "version": "0.0.3",
+    "main": "build/graph-demo-3ears.js",
     "repository": "git@github.com:senor-tomate/graph-demo-3ears.git",
     "author": "Matvey Shakula <matveyshakula@gmail.com>",
     "license": "MIT",
@@ -25,8 +25,8 @@
         "webpack-dev-server": "^3.10.3"
     },
     "scripts": {
-        "start": "webpack-dev-server --hot --inline --config webpack.config.js",
-        "build": "webpack"
+        "start": "webpack-dev-server --hot --inline --config webpack.dev.js",
+        "build": "webpack --mode production --config webpack.build.js"
     },
     "files": ["build/"]
 }
