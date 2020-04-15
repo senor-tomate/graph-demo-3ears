@@ -370,14 +370,14 @@ class PiePlotDemo extends Container
         }];
         
         let GraphLayout = {
-            // width: {flex:1 },
-            // height: {flex: 1},
+            width: {flex:1 },
+            height: {flex: 1},
             // title: 'The Words',
             showlegend: false,
         }
         return ( 
         <div>
-            <div class="grid">
+            {/* <div class="grid">
                 <div class="grid__item">
                     <div class="content">
                     <div class="content-inside">
@@ -418,7 +418,7 @@ class PiePlotDemo extends Container
                     </div>
                     </div>
                 </div>
-            </div>
+            </div> */}
 
             {/* <div class="container">
                 <div>
@@ -446,7 +446,6 @@ class PiePlotDemo extends Container
                 <div><h1>a</h1></div>
             </div> */}
 
-            {/* <div className = "breaker">
             <div className='FrequentWordsPiePlot'>
                 <h1 className = 'Header'>
                     A
@@ -472,10 +471,10 @@ class PiePlotDemo extends Container
                     />
                 </div>
                 <div className='Checkboxes'>
-                    { this.switches() }
+                    {/* { this.switches() } */}
+                    <h3>SHITHISHITS</h3>
                 </div>
             </div>
-            </div>  */}
         </div>
 
 

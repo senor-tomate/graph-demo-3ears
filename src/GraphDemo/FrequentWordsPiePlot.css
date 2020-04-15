@@ -1,56 +1,69 @@
 /* FrequentWordsPiePlot.css */
 
-.breaker {
-    max-height: 800px;
-    max-width: 600px;
-
+* {
+  box-sizing: border-box;
 }
 
 .FrequentWordsPiePlot {
     display: grid;
+    width: 100%;
+    height: 0;
     /* grid-template-columns: 37.5% 50% 12.5%;
     grid-template-rows: 16.67% 66.66% 16.67%; */
     grid-template-columns: 3fr 4fr 1fr;
-    grid-template-rows: 1fr 4fr 1fr;
+    /* grid-template-rows: 1fr 4fr 1fr; */
     grid-template-areas: 
         "header .      .  "
         "total  plot-container   checkboxes"
         "total  slider .";
-    /* width:  minmax(600px, 100%);
-    height: minmax(400px, 100%); */
-    /* min-height: 400px;
-    min-width:  600px; */
-    /* padding-bottom: 33%; */
 }
 
+/* Corresponds to .grid__item[nth-child]*/
 .PiePlotContainer {
     grid-area: plot-container;
-    /* background: #004182; */
-    /* position: absolute; */
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 400px;
-    height: 400px;
-    display: grid;
-    /* justify-items: start; */
-    /* align-items: end; */
+    /* display: grid; */
     grid-template-areas: "plot";
-    /* padding-top: 100%; */
-    /* position: relative; */
+
+    width: 100%;
+    height: 0;
+
+    min-width: 200px;
+    padding-top: 100%;
+
+    position: relative;
+    justify-items: center; 
+    align-items:   center;   
 }
 
+/* .PiePlot::before {
+    width: 100%;
+    content: "";
+} */
+
+/* Corresponds to .grid__item .content */
 .PiePlot {
-    width: 400px;
-    height: 400px;
-    padding-top: 50%;
-    padding-bottom: 50%;
-    grid-area: plot;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    
+    align-self: center;
+    justify-self: center;
+}
+
+
+.SliderContainer {
+
 }
 
 .Slider {
     width: 100%;
     grid-area: slider;
+}
+
+
+.CheckboxesContainer {
+
 }
 
 .Checkboxes {
@@ -60,11 +73,19 @@
     justify-self: center;
 }
 
+.HeaderContainer {
+
+}
+
 .Header {
     width: 100%;
     grid-area: header;
     color: "white";
-    padding: "10px";
+}
+
+
+.TotalContainer {
+
 }
 
 .Total {
@@ -75,10 +96,6 @@
 }
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~` */
-
-* {
-  box-sizing: border-box;
-}
 
 .grid {
   display: grid;
@@ -94,7 +111,7 @@
   grid-column: 1 / 3;
 }
 .grid__item:nth-child(1)::before {
-  /* padding-top: 50%; */
+  padding-top: 50%;
 }
 .grid__item:nth-child(1) .content {
   -webkit-box-align: center;
@@ -119,7 +136,7 @@
   content: "";
   height: 0;
   display: inline-block;
-  /* padding-top: 100%; */
+  padding-top: 100%;
   width: 10px;
   position: relative;
 }
