@@ -16,6 +16,7 @@
         "babel": "^6.23.0",
         "babel-core": "^6.23.0",
         "babel-loader": "7",
+        "babel-preset-env": "^1.7.0",
         "babel-preset-react": "^6.24.1",
         "copy-webpack-plugin": "^5.1.1",
         "file-loader": "^6.0.0",
@@ -28,5 +29,7 @@
         "start": "webpack-dev-server --hot --inline --config webpack.dev.js",
         "build": "webpack --mode production --config webpack.build.js"
     },
-    "files": ["build/"]
+    "files": [
+        "build/"
+    ]
 }
