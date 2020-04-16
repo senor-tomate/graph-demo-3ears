@@ -12,10 +12,7 @@ const filename = PRODUCTION ? `${library}.min.js` : `${library}.js`
 
 const plugins = []
 
-console.log("STARTING")
-
 if (PRODUCTION) {
-    console.log("PRODUCTION")
     plugins.push(
         new webpack.DefinePlugin({
         'process.env.NODE_ENV': JSON.stringify(ENVIRONMENT),
@@ -23,38 +20,58 @@ if (PRODUCTION) {
         new webpack.optimize.ModuleConcatenationPlugin(),
         new webpack.optimize.UglifyJsPlugin({
         minimize: true,
-        output: { comments: false, semicolons: false },
+        output: { comments: false, semicolons: true },
         sourceMap: SOURCEMAP,
         })
     )
 }
 
 module.exports = {
-  devtool: SOURCEMAP ? 'source-map' : 'none',
-  entry:  `${__dirname}/src/index.js`, // << RENAME THIS <<
-  externals: {
-    'react': 'react',
-    'react-dom': 'react-dom',
-  },
-  module: {
-    rules: [
-        {
-            test: /\.js$/, // include .js files
-            enforce: "pre",
-            exclude: /node_modules/, // exclude any and all files in the node_modules folder
-            include: [path.join(__dirname, 'src')],
-            use: {
-                loader: "babel-loader"
-            }
-        },
-    ]
-  },
-  output: {
-    filename,
-    library,
-    path:           `${__dirname}/build`,
-    libraryTarget:  'umd',
-    umdNamedDefine: true,
-  },
-  plugins,
+    devtool: SOURCEMAP ? 'source-map' : 'none',
+    entry: {
+        // index:   { import: './src/index.js', dependOn: 'shared' },
+        // another: { import: './src/another-module.js', dependOn: 'shared' },
+        // shared: 'lodash',
+        index: './src/index.js'
+
+        // /* Attempsts @ splitting data from bundle. */
+        // index: {import : './src/index.js', dependOn: '_lemma_MASTER3', filename: "index.js"},
+        // _lemma_MASTER3: {import: './data/_lemma_MASTER3.json', filename: "_lemma_MASTER3.json"}
+    },
+    externals: {
+        'react': 'react',
+        'react-dom': 'react-dom',
+        '@material-ui': '@material-ui',
+        '@material-ui/core': '@material-ui/core',
+        'plotly.js' : 'plotly.js',
+        'react-plotly.js': 'react-plotly.js'
+    },
+    module: {
+        rules: [
+            {
+                test: /\.js$/, // include .js files
+                enforce: "pre",
+                exclude: /node_modules/, // exclude any and all files in the node_modules folder
+                include: [path.join(__dirname, 'src')],
+                use: {
+                    loader: "babel-loader"
+                }
+            },
+            // /* Attempt @ splitting data from bundle. */
+            // {
+            //     test: /\.json$/,
+            //     use: {
+            //         loader: "json-loader"
+            //     }
+            // }
+        ]
+    },
+    output: {
+        filename,
+        library,
+        path:           `${__dirname}/build`,
+        libraryTarget:  'umd',
+        umdNamedDefine: true,
+    },
+    plugins,
 }
