@@ -1,3 +1,4 @@
 {
-    "presets": ["react", "babel-preset-env"]
+    "presets": ["react", "babel-preset-env"],
+    // "sourceType": "unambiguous"
 }
