@@ -62,7 +62,7 @@ class PiePlotDemo extends Container
             graphData: [], 
         }
         this.state.graphData = this.getGraphData();
-        window.addEventListener('resize', (ev) => this.handleGraphSizeChange(ev) )
+        // window.addEventListener('resize', (ev) => this.handleGraphSizeChange(ev) )
     }
 
     /**
@@ -223,6 +223,7 @@ class PiePlotDemo extends Container
                 <FormControlLabel
                     control={
                         <Checkbox 
+                            style={{fontSize: "2rem"}}
                             checked={state.adj} 
                             onChange={ (event, newCheck) => 
                                     this.handleSwitchChange(event, newCheck, 'adj') 
@@ -235,7 +236,8 @@ class PiePlotDemo extends Container
                 <FormControlLabel
                     control={
                         <Checkbox
-                        checked={state.adjpron}
+                            style={{fontSize: "2rem"}}
+                            checked={state.adjpron}
                         onChange={ (event, newCheck) => 
                             this.handleSwitchChange(event, newCheck, 'adjpron')
                         }
@@ -247,6 +249,7 @@ class PiePlotDemo extends Container
                 <FormControlLabel
                     control={
                         <Checkbox 
+                            style={{fontSize: "2rem"}}
                             checked={state.noun} 
                             onChange={ (event, newCheck) => 
                                     this.handleSwitchChange(event, newCheck, 'noun') 
@@ -259,6 +262,7 @@ class PiePlotDemo extends Container
                 <FormControlLabel
                     control={
                         <Checkbox 
+                            style={{fontSize: "2rem"}}
                             checked={state.verb} 
                             onChange={ (event, newCheck) => 
                                     this.handleSwitchChange(event, newCheck, 'verb') 
@@ -271,6 +275,7 @@ class PiePlotDemo extends Container
                 <FormControlLabel
                     control={
                         <Checkbox 
+                            style={{fontSize: "2rem"}}
                             checked={state.pron} 
                             onChange={ (event, newCheck) => 
                                     this.handleSwitchChange(event, newCheck, 'pron') 
@@ -283,6 +288,7 @@ class PiePlotDemo extends Container
                 <FormControlLabel
                     control={
                         <Checkbox 
+                            style={{fontSize: "2rem"}}
                             checked={state.prep} 
                             onChange={ (event, newCheck) => 
                                     this.handleSwitchChange(event, newCheck, 'prep') 
@@ -295,6 +301,7 @@ class PiePlotDemo extends Container
                 <FormControlLabel
                     control={
                         <Checkbox 
+                            style={{fontSize: "2rem"}}
                             checked={state.misc} 
                             onChange={ (event, newCheck) => 
                                     this.handleSwitchChange(event, newCheck, 'misc') 
@@ -307,6 +314,7 @@ class PiePlotDemo extends Container
                 <FormControlLabel
                     control={
                         <Checkbox 
+                            style={{fontSize: "2rem"}}
                             checked={state.adv} 
                             onChange={ (event, newCheck) => 
                                     this.handleSwitchChange(event, newCheck, 'adv') 
@@ -319,6 +327,7 @@ class PiePlotDemo extends Container
                 <FormControlLabel
                     control={
                         <Checkbox 
+                            style={{fontSize: "2rem"}}
                             checked={state.ord} 
                             onChange={ (event, newCheck) => 
                                     this.handleSwitchChange(event, newCheck, 'ord') 
@@ -331,6 +340,7 @@ class PiePlotDemo extends Container
                 <FormControlLabel
                     control={
                         <Checkbox 
+                            style={{fontSize: "2rem"}}
                             checked={state.card} 
                             onChange={ (event, newCheck) => 
                                     this.handleSwitchChange(event, newCheck, 'card') 
@@ -370,109 +380,58 @@ class PiePlotDemo extends Container
         }];
         
         let GraphLayout = {
-            width: {flex:1 },
-            height: {flex: 1},
-            // title: 'The Words',
             showlegend: false,
+            margin: {
+                l: 0,
+                r: 0,
+                t: 0,
+                b: 0
+            }
+        }
+
+        let GraphConfig = {
+            responsive: true,
+            staticPlot: true,
+            displayModeBar: false,
         }
         return ( 
         <div>
-            {/* <div class="grid">
-                <div class="grid__item">
-                    <div class="content">
-                    <div class="content-inside">
-                        <h2>2:1</h2>
-                        <p>Centered</p>
-                    </div>
-                    </div>
-                </div>
-                <div class="grid__item">
-                    <div class="content">
-                    <div class="content-inside">
-                        <h2>1:1</h2>
-                        <p>Lower Left</p>
-                    </div>
-                    </div>
-                </div>
-                <div class="grid__item">
-                    <div class="content">
-                    <div class="content-inside">
-                        <h2>1:1</h2>
-                        <p>Lower Left</p>
-                    </div>
-                    </div>
-                </div>
-                <div class="grid__item">
-                    <div class="content">
-                    <div class="content-inside">
-                        <h2>1:1</h2>
-                        <p>Lower Left</p>
-                    </div>
-                    </div>
-                </div>
-                <div class="grid__item">
-                    <div class="content content-lr">
-                    <div class="content-inside">
-                        <h2>1:1</h2>
-                        <p>Lower Right</p>
-                    </div>
-                    </div>
-                </div>
-            </div> */}
-
-            {/* <div class="container">
-                <div>
-                    <h1>a</h1>
-                </div>
-                <div>
-                    <h1>a</h1>
-                </div><div>
-                    <h1>a</h1>
-                </div><div>
-                    <h1>a</h1>
-                </div><div>
-                    <h1>a</h1>
-                </div><div>
-                    <h1>a</h1>
-                </div><div>
-                    <h1>a</h1>
-                </div>
-                <div><h1>a</h1></div>
-                <div><h1>a</h1></div>
-                <div><h1>a</h1></div>
-                <div><h1>a</h1></div>
-                <div><h1>a</h1></div>
-                <div><h1>a</h1></div>
-                <div><h1>a</h1></div>
-            </div> */}
-
             <div className='FrequentWordsPiePlot'>
-                <h1 className = 'Header'>
-                    A
-                </h1>
-                <h1 className = 'Total'>
-                    T
-                </h1>
-                <div className = 'PiePlotContainer' id={this.id+'_PiePlot'}>
-                    <Plot
-                        data = {data}
-                        layout={GraphLayout}
-                        className='PiePlot'
-                    />
+                <div className = 'HeaderContainer'>
+                    <h1 className='Header'>KNOWN WORDS</h1>
                 </div>
-                <div className='Slider'>
-                    <Slider 
-                        min={MIN_SLIDER_NUMBER}
-                        max={MAX_SLIDER_NUMBER}
-                        scale={ (disp) => this.sliderScaleFunction(disp) }
-                        value={this.state.range} 
-                        onChange= { (event, newVal) => this.handleSliderChange(event, newVal) } 
-                        valueLabelDisplay="on"
-                    />
+                <div className = 'Total'>
                 </div>
-                <div className='Checkboxes'>
-                    {/* { this.switches() } */}
-                    <h3>SHITHISHITS</h3>
+                <div className = 'PiePlotContainer' >
+                    <div className='PiePlot' id={this.id+'_PiePlot'}>
+                        <Plot
+                            data = {data}
+                            layout={GraphLayout}
+                            config={GraphConfig}
+                            style={{
+                                position: "relative",
+                                height: "100%",
+                                width: "100%",
+                            }}
+                        />
+                    </div>
+                </div>
+                <div className='SliderContainer'>
+                    <div className='Slider'>
+                        <Slider 
+                            min={MIN_SLIDER_NUMBER}
+                            max={MAX_SLIDER_NUMBER}
+                            scale={ (disp) => this.sliderScaleFunction(disp) }
+                            value={this.state.range} 
+                            onChange= { (event, newVal) => this.handleSliderChange(event, newVal) } 
+                            valueLabelDisplay="on"
+                            // className='Slider'
+                        />
+                    </div>
+                </div>
+                <div className='CheckboxesContainer'>
+                    { this.switches() }
+                    {/* <h3>SHITHISHITS</h3> */}
                 </div>
             </div>
         </div>
