@@ -1,443 +1,148 @@
 // FrequentWordsPiePlot.js
+// Logic container for the Most Frequent Known Words graph.
+// This is the class that should be added to 3ears graph page.
 
 import React from 'react'
-import Container from './Container';
-import Plot from 'react-plotly.js';
+import axios from 'axios'
 
-import Slider from '@material-ui/core/Slider';
-import Checkbox from '@material-ui/core/Checkbox';
-import FormGroup from '@material-ui/core/FormGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
+// import './FrequentWordsPiePlot.css';
+import FrequentWordsCard from './FrequentWordsCard';
 
-import MASTER_DB from '../../data/_lemma_MASTER3.json';
+let SLIDER_SCALE_BASE   = 1.0/2.5;
 
-import './FrequentWordsPiePlot.css';
-
-let MAX_SLIDER_NUMBER = 5000;
-let MIN_SLIDER_NUMBER = 0;
-let SLIDER_LOG_BASE   = 1.0/3.0;
-
-export default 
-class PiePlotDemo extends Container
+export default
+class FrequentWordsPiePlot
+extends React.Component
 {
+
     /**
-     * @brief Constructor.
-     * 
-     * @param {*} props.db - Database, can be null.
-     * @param {*} props.knownWords - Array of known word strings. Not copied into object.
+     * @param props must contain user_id for user's words.
      */
     constructor(props)
     {
-        super(props);
-        
-        if (props.db != null) 
-            this.db = JSON.parse(JSON.stringify(props.db));
-        else
-            this.db = JSON.parse(JSON.stringify(MASTER_DB));
-        this.wordCount = this.db.length;
-
-        this.knownWords = props.knownWords;
-        for (let i = 0; i < this.wordCount; ++i) {
-            if ( !this.knownWords.includes(this.db[i].lemma) ) {
-                this.db[i]["known"] = false;
-            }
-            else {
-                this.db[i]["known"] = true;
-            }
-        }   
+        super(props)
+        this.uid = props.user_id;
+        this.maxWordAmount=-1;
+        this.wordRange = []
 
         this.state = {
-            range: [MIN_SLIDER_NUMBER, MAX_SLIDER_NUMBER],
-            adj : true,
-            adjpron: true,
-            noun: true,
-            verb: true,
-            prep: true,
-            pron: true,
-            adv : true,
-            ord : true,
-            card: true,
-            misc: true,
-            graphDims: this.getGraphSize(),
-            graphData: [], 
+            data: {},
         }
-        this.state.graphData = this.getGraphData();
-        // window.addEventListener('resize', (ev) => this.handleGraphSizeChange(ev) )
+
+        this.fetchData();
+        this.calibrateSliders();
     }
 
-    /**
-     * @brief Returns graph data according to settings set in this object.
-     * 
-     * Generally used only with @code this.graphData=this.getGraphData(); @endcode
-     */
-    getGraphData()
+    calibrateSliders()
     {
-        let data = {adj: 0, uadj: 0,
-                    adjpron: 0, uadjpron: 0,
-                    noun: 0, unoun: 0,
-                    verb: 0, uverb: 0,
-                    prep: 0, uprep: 0,
-                    pron: 0, upron: 0,
-                    adv: 0 , uadv: 0,
-                    ord: 0 , uord: 0,
-                    card: 0, ucard: 0,
-                    misc: 0, umisc: 0
+        const params = {
+            "user_id": this.uid,
+            "q[language_code]": 'ru'
         };
-        let range = [this.sliderScaleFunction(this.state.range[0]), 
-                     this.sliderScaleFunction(this.state.range[1])
-                    ];
 
-        for (const entry of this.db) {
-            // If not in selected range
-            if (!(entry.rank>=range[0] && entry.rank<=range[1])) {
-                continue;
+        let ret = axios.get(
+            'https://itl.3ears.com/api/learner_data/frequent_words/statistic',
+            { params: params } 
+        ).then( ({ data }) => {
+            let maxCount=0;
+            for (let key in data) {
+                maxCount += data[key];
             }
-            switch (entry.wtype) {
-                case 'adj':
-                    if (!this.state.adj) continue;
-                    if (entry.known) data.adj++;
-                    else data.uadj++;
-                    break;
-                case 'adjpron':
-                    if (!this.state.adjpron) continue;
-                    if (entry.known) data.adjpron++;
-                    else data.uadjpron++;
-                    break;
-                case 'noun':
-                    if (!this.state.noun) continue;
-                    if (entry.known) data.noun++;
-                    else data.unoun++;
-                    break;
-                case 'verb':
-                    if (!this.state.verb) continue;
-                    if (entry.known) data.verb++;
-                    else data.uverb++;
-                    break;
-                case 'prep':
-                    if (!this.state.prep) continue;
-                    if (entry.known) data.prep++;
-                    else data.uprep++;
-                    break;
-                case 'pron':
-                    if (!this.state.pron) continue;
-                    if (entry.known) data.pron++;
-                    else data.upron++;
-                    break;
-                case 'adv':
-                    if (!this.state.adv) continue;
-                    if (entry.known) data.adv++;
-                    else data.uadv++;
-                    break;
-                case 'ord':
-                    if (!this.state.ord) continue;
-                    if (entry.known) data.ord++;
-                    else data.uord++;
-                    break;
-                case 'card':
-                    if (!this.state.card) continue;
-                    if (entry.known) data.card++;
-                    else data.ucard++;
-                    break;
-                case 'misc':
-                    if (!this.state.misc) continue;
-                    if (entry.known) data.misc++;
-                    else data.umisc++;
-                    break;
-                default:
-                    console.log("Invalid wtype found " + entry.wtype);
-                    break;
-            }
-        }
-        return data;
+            this.maxWordAmount=maxCount;
+        });
     }
 
-    /**
-     * @brief Scaler function for slider.
-     * @param {*} x - integers to scale.
-     */
-    sliderScaleFunction(x)
+    fetchData()
     {
-        let ret = Math.floor(this.wordCount ** Math.pow(x/MAX_SLIDER_NUMBER, SLIDER_LOG_BASE));
+        const params = {
+            "user_id": this.uid,
+            "q[language_code]": 'ru',
+            "q[rank_gteq]": this.wordRange[0],
+            "q[rank_lteq]": this.wordRange[1]
+        };
+        axios.get(
+            'https://itl.3ears.com/api/learner_data/frequent_words/statistic',
+            { params: params } 
+        ).then( ({ data }) => {
+            // console.log("DATA FETCHED");
+            this.setState({data: data});
+        });
+    }
+
+    parseData(data)
+    {
+        // These are the word types returned from the request.
+        // I honestly dont like this appraoch of just writing them out like
+        // this, but oh well.
+        let ret = {
+            'adj':      null,
+            'noun':     null,
+            'verb':     null,
+            'pron':     null,
+            'adjpron':  null,
+            'prep':     null,
+            'adv':      null,
+            'ord':      null,
+            'card':     null,
+            'misc':     null
+        };
+
+        const wordTypeDict = {
+            'adj':      "Adjectives",
+            'noun':     "Nouns",
+            'verb':     "Verbs",
+            'pron':     "Pronouns",
+            'adjpron':  "Adjective Pronouns",
+            'prep':     "Prepositions",
+            'adv':      "Adverbs",
+            'ord':      "Ordinals",
+            'card':     "Cardinals",
+            'misc':     "Misclaneous Words"
+        }
+
+        for (let item in data) {
+            let label   = "";
+            let unknown = false;
+            if (item.substring(0, 1)=='u')
+                unknown=true;
+
+            let type = ! unknown ? item : item.substr(1);
+            label += wordTypeDict[type];
+            
+            // console.log("ret[type]=" + ret[type])
+            // console.log(ret[type]);
+            if (ret[type] == null) {
+                ret[type] = {
+                    wordType: label,
+                    counts: [-1, -1]
+                }
+            }
+            if (!unknown)
+                ret[type]['counts'][0] = data[item];
+            else
+                ret[type]['counts'][1] = data[item];
+        }
         return ret;
     }
 
-    /**
-     * @brief Returns size of graph according to window size.
-     * 
-     * Should be changed later to accomodate for css and such.
-     */
-    getGraphSize()
+    // Values: [] with low and high (0-1 range)
+    handleSliderChange(values)
     {
-        return (window.innerWidth <= window.innerHeight) ? 
-        window.innerWidth-30 : window.innerHeight-30;
+        let scaleFunction = (num) => 
+            Math.floor(this.maxWordAmount**Math.pow(num, SLIDER_SCALE_BASE));
 
-        // let ret = Math.min($('PiePlot').width, $('PiePlot').height);
-        // return ret;
-
-        // return 400;
+        this.wordRange[0] = scaleFunction(value[0]);
+        this.wordRange[1] = scaleFunction(value[1]);
+        this.fetchData();
     }
 
-    /**
-     * @brief Callback to change size of component.
-     * 
-     * @param {*} ev 
-     */
-    handleGraphSizeChange(ev)
-    {
-        // this.setState( { graphDims: this.getGraphSize() } );
-    }
-
-    /**
-     * @brief Callback to change target word range according to slider.
-     * 
-     * @param {*} event  - ???
-     * @param {*} newVal - Array with 2 integers, low then high.
-     */
-    handleSliderChange(event, newVal)
-    {
-        this.setState( { range: newVal } );
-        this.setState( { graphData: this.getGraphData() } );
-    }
-
-    /**
-     * @brief Callback to switch word types on or off according to switches.
-     * 
-     * @param {*} event   - ???
-     * @param {*} checked - Boolean to signify whether word type is turned on.
-     * @param {*} type    - Word type to turn on or off.
-     */
-    handleSwitchChange(event, checked, type)
-    {
-        this.state[type] = checked;
-        this.setState( { graphData: this.getGraphData() } );
-    }
-
-    /**
-     * @brief Return html for the switch rendering.
-     */
-    switches()
-    {
-        let state = this.state;
-        return (
-            <FormGroup row>
-                <FormControlLabel
-                    control={
-                        <Checkbox 
-                            style={{fontSize: "2rem"}}
-                            checked={state.adj} 
-                            onChange={ (event, newCheck) => 
-                                    this.handleSwitchChange(event, newCheck, 'adj') 
-                            } 
-                            color='primary'
-                        />
-                    }
-                    label="Adjectives"
-                />
-                <FormControlLabel
-                    control={
-                        <Checkbox
-                            style={{fontSize: "2rem"}}
-                            checked={state.adjpron}
-                        onChange={ (event, newCheck) => 
-                            this.handleSwitchChange(event, newCheck, 'adjpron')
-                        }
-                        color='primary'
-                        />
-                    }
-                    label="Adjective Pronouns"
-                />
-                <FormControlLabel
-                    control={
-                        <Checkbox 
-                            style={{fontSize: "2rem"}}
-                            checked={state.noun} 
-                            onChange={ (event, newCheck) => 
-                                    this.handleSwitchChange(event, newCheck, 'noun') 
-                            } 
-                            color='primary'
-                        />
-                    }
-                    label="Nouns"
-                />
-                <FormControlLabel
-                    control={
-                        <Checkbox 
-                            style={{fontSize: "2rem"}}
-                            checked={state.verb} 
-                            onChange={ (event, newCheck) => 
-                                    this.handleSwitchChange(event, newCheck, 'verb') 
-                            } 
-                            color='primary'
-                        />
-                    }
-                    label="Verbs"
-                />
-                <FormControlLabel
-                    control={
-                        <Checkbox 
-                            style={{fontSize: "2rem"}}
-                            checked={state.pron} 
-                            onChange={ (event, newCheck) => 
-                                    this.handleSwitchChange(event, newCheck, 'pron') 
-                            } 
-                            color='primary'
-                        />
-                    }
-                    label="Pronouns"
-                />
-                <FormControlLabel
-                    control={
-                        <Checkbox 
-                            style={{fontSize: "2rem"}}
-                            checked={state.prep} 
-                            onChange={ (event, newCheck) => 
-                                    this.handleSwitchChange(event, newCheck, 'prep') 
-                            } 
-                            color='primary'
-                        />
-                    }
-                    label="Prepositions"
-                />
-                <FormControlLabel
-                    control={
-                        <Checkbox 
-                            style={{fontSize: "2rem"}}
-                            checked={state.misc} 
-                            onChange={ (event, newCheck) => 
-                                    this.handleSwitchChange(event, newCheck, 'misc') 
-                            } 
-                            color='primary'
-                        />
-                    }
-                    label="Other"
-                />
-                <FormControlLabel
-                    control={
-                        <Checkbox 
-                            style={{fontSize: "2rem"}}
-                            checked={state.adv} 
-                            onChange={ (event, newCheck) => 
-                                    this.handleSwitchChange(event, newCheck, 'adv') 
-                            } 
-                            color='primary'
-                        />
-                    }
-                    label="Adverb"
-                />
-                <FormControlLabel
-                    control={
-                        <Checkbox 
-                            style={{fontSize: "2rem"}}
-                            checked={state.ord} 
-                            onChange={ (event, newCheck) => 
-                                    this.handleSwitchChange(event, newCheck, 'ord') 
-                            } 
-                            color='primary'
-                        />
-                    }
-                    label="Ordinal"
-                />
-                <FormControlLabel
-                    control={
-                        <Checkbox 
-                            style={{fontSize: "2rem"}}
-                            checked={state.card} 
-                            onChange={ (event, newCheck) => 
-                                    this.handleSwitchChange(event, newCheck, 'card') 
-                            } 
-                            color='primary'
-                        />
-                    }
-                    label="Cardinal"
-                />
-            </FormGroup>
-        );
-    }
-
-    /**
-     * @brief Renders component.
-     */
     render()
     {
-        let colors = [
-            '#f04060', '#f0a040', '#e0e030', '#30e040', '#30e0e0', '#3040e0', '#b030e0',
-            '#f3647e', '#f3b264', '#efef96', '#96ef9e', '#96efef', '#969eef', '#d796ef'
-        ];
-        let gd = this.state.graphData;
-        let data = [{
-        labels: ["Adjectives", "Nouns", "Verbs", "Pronouns", "Adjective Pronouns", "Prepositions", 
-                     "Adverbs", "Ordinals", "Cardinals", "Other", "Unknown Adjectives", "Unknown Nouns", "Unknown Verbs", 
-                     "Unknown Pronouns", "Unknown Adjective Pronouns", "Unknown Prepositions", 
-                     "Unknown Adverbs", "Unknown Ordinals", "Unknown Cardinals", "Unknown Other"],
-            values: [gd.adj, gd.noun, gd.verb, gd.pron, gd.adjpron, gd.prep, gd.adv, gd.ord, gd.card, gd.misc, gd.uadj, gd.unoun, gd.uverb, gd.upron, gd.uadjpron, gd.uprep, gd.uadv, gd.uord, gd.ucard, gd.umisc],
-            type: 'pie',
-            textinfo: 'label+precent',
-            textposition: "inside",
-            automargin: true,
-            marker: {
-                colors: colors
-            },
-        }];
-        
-        let GraphLayout = {
-            showlegend: false,
-            margin: {
-                l: 0,
-                r: 0,
-                t: 0,
-                b: 0
-            }
-        }
-
-        let GraphConfig = {
-            responsive: true,
-            staticPlot: true,
-            displayModeBar: false,
-        }
-        return ( 
-        <div>
-            <div className='FrequentWordsPiePlot'>
-                <div className = 'HeaderContainer'>
-                    <h1 className='Header'>KNOWN WORDS</h1>
-                </div>
-                <div className = 'Total'>
-                </div>
-                <div className = 'PiePlotContainer' >
-                    <div className='PiePlot' id={this.id+'_PiePlot'}>
-                        <Plot
-                            data = {data}
-                            layout={GraphLayout}
-                            config={GraphConfig}
-                            style={{
-                                position: "relative",
-                                height: "100%",
-                                width: "100%",
-                            }}
-                        />
-                    </div>
-                </div>
-                <div className='SliderContainer'>
-                    <div className='Slider'>
-                        <Slider 
-                            min={MIN_SLIDER_NUMBER}
-                            max={MAX_SLIDER_NUMBER}
-                            scale={ (disp) => this.sliderScaleFunction(disp) }
-                            value={this.state.range} 
-                            onChange= { (event, newVal) => this.handleSliderChange(event, newVal) } 
-                            valueLabelDisplay="on"
-                            // className='Slider'
-                        />
-                    </div>
-                </div>
-                <div className='CheckboxesContainer'>
-                    { this.switches() }
-                    {/* <h3>SHITHISHITS</h3> */}
-                </div>
-            </div>
-        </div>
-
-
-        );
+        // console.log("PARENT RENDERING");
+        // console.log(this.parseData(this.state.data));
+        return <FrequentWordsCard 
+                    data={this.parseData(this.state.data)}
+                    onSliderChange={(values)=>this.handleSliderChange(values)}
+                />
     }
-
-};
+}
