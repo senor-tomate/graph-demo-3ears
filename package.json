@@ -1,6 +1,6 @@
 {
     "name": "graph-demo-3ears",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "main": "build/graph-demo-3ears.js",
     "repository": "git@github.com:senor-tomate/graph-demo-3ears.git",
     "author": "Matvey Shakula <matveyshakula@gmail.com>",
