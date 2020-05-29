@@ -4,9 +4,19 @@
 
 import React from 'react';
 
-const CIRCLE_CENTER_X = 360;
-const CIRCLE_CENTER_Y = 140;
-const CIRCLE_RADIUS   = 120;
+const CIRCLE_CENTER_X     = 360;
+const CIRCLE_CENTER_Y     = 135;
+const CIRCLE_RADIUS       = 120;
+const CIRCLE_INNER_RADIUS = 60;
+
+const SLIDER_TO_CIRCLE_RATIO = 4.0/5.0;
+const SLIDER_TO_CIRCLE_PAD   = 20;
+const SLIDER_LENGTH          = SLIDER_TO_CIRCLE_RATIO * CIRCLE_RADIUS * 2;
+const SLIDER_START_X         = CIRCLE_CENTER_X-SLIDER_LENGTH/2;
+const SLIDER_START_Y         = CIRCLE_CENTER_Y + CIRCLE_RADIUS + SLIDER_TO_CIRCLE_PAD;
+
+const SLIDER_LEFT_COLOR      = hslToRgb(210.0/360, 1, .7);
+const SLIDER_RIGHT_COLOR     = hslToRgb(280.0/360, 1, .7);
 
 export default
 class FrequentWordsCard
@@ -17,15 +27,22 @@ extends React.Component
     {
         super(props)
         this.state = {
-            show: {}
+            show: {},
         }
+        this.slider_left_position = 0.0;
+        this.slider_right_position= 1.0;
+        this.slider_dragged=null;
+
         this.slice_clicked = false;
-        this.clicked_slice = ""
+        this.clicked_slice = "";
         for (let item in this.props.data) {
             this.state.show[item] = true;
         }
+        this.__PT = null; 
+        this.__SVG = null;
     }
 
+    //#region sliceEmphasis
     clear_click() {
         if (this.clicked_slice != "")
             this.deemphasize_slice(this.clicked_slice);
@@ -34,18 +51,19 @@ extends React.Component
     }
 
     handle_slice_emphasis(evt, slice_id) {
+        if (document.getElementById(slice_id) == null) return;
         switch (evt.type) {
-            case 'mouseenter':
+            case 'pointerenter':
                 if (!this.slice_clicked) 
                     this.emphasize_slice(slice_id);
                 break;
 
-            case 'mouseleave':
+            case 'pointerleave':
                 if (!this.slice_clicked) 
                     this.deemphasize_slice(slice_id);
                 break;
 
-            case 'click':
+            case 'pointerdown':
                 if (this.slice_clicked) {
                     if (this.clicked_slice == slice_id) {
                         this.clear_click();
@@ -72,8 +90,12 @@ extends React.Component
         let slice = document.getElementById(slice_id);
         let text  = document.getElementById(slice_id+'_text');
 
+        let factor = 1.02;
+        let c1 = -1.0 * (CIRCLE_CENTER_X) * (factor-1);
+        let c2 = -1.0 * (CIRCLE_CENTER_Y) * (factor-1);
+
         slice.setAttribute('filter', 'url(#dropShadow_slice)');
-        slice.setAttribute('transform', 'translate(-6.6, -3.0) scale(1.02, 1.02)');
+        slice.setAttribute('transform', 'translate('+c1+','+c2+') scale('+factor+','+factor+')');
 
         text.setAttribute('visibility', 'visible');
 
@@ -84,12 +106,148 @@ extends React.Component
         let slice = document.getElementById(slice_id);
         let text  = document.getElementById(slice_id+'_text');
 
-        slice.setAttribute('filter', 'null');
-        slice.setAttribute('transform', 'translate(0, 0)');
+        if (slice != null) {
+            slice.setAttribute('filter', 'null');
+            slice.setAttribute('transform', 'translate(0, 0)');
+        }
 
         text.setAttribute('visibility', 'hidden');
     }
+    //#endregion sliceEmphasis
 
+    //#region sliderEmphasis
+
+    sliderMouseEnter() {;
+        let slider = document.getElementById("slider_line_middle");
+        slider.setAttribute("stroke-opacity", .5);
+    }
+
+    sliderMouseLeave() {
+        let slider = document.getElementById("slider_line_middle");
+        slider.setAttribute("stroke-opacity", .2);
+    }
+
+    _getCircleFromHitbox(hitbox) {
+        let circle_id = hitbox.getAttribute('id').substring(0, 15);
+        return {
+            isLeft: hitbox.getAttribute('id')=="slider_circle_1_hitbox",
+            circle: document.getElementById(circle_id),
+            hitbox: hitbox,
+            label: document.getElementById(circle_id+"_label")
+        }
+    }
+
+    sliderCircleEnter(evt) {
+        this.sliderMouseEnter();
+        if (this.slider_dragged != null) return;
+        let hitbox = evt.target;
+        let circle = this._getCircleFromHitbox(hitbox);
+        let otherCircle = this._getCircleFromHitbox( circle.isLeft ? 
+                            document.getElementById('slider_circle_2_hitbox'): 
+                            document.getElementById('slider_circle_1_hitbox'));
+        let otherCircle_path = circle.isLeft ?
+            document.getElementById('slider_circle_2_label_path') :
+            document.getElementById('slider_circle_1_label_path');
+        let circle_path = !circle.isLeft ?
+            document.getElementById('slider_circle_2_label_path') :
+            document.getElementById('slider_circle_1_label_path');
+
+        circle.circle.setAttribute('r', 5);
+        circle.circle.setAttribute('filter', 'url(#dropShadow_circle)');
+        circle.label.setAttribute('visibility', 'visible');
+        circle_path.setAttribute('fill-opacity', .8)
+
+        otherCircle.label.setAttribute('visibility', 'visible');
+        otherCircle_path.setAttribute('fill-opacity', .4)
+    }
+
+    sliderCircleLeave(evt) {
+        let hitbox = evt.target;
+        let circle = this._getCircleFromHitbox(hitbox);
+        if (this.slider_dragged == null) this.sliderMouseLeave();
+        if (this.slider_dragged != null && 
+            circle.circle.getAttribute('id')==this.slider_dragged.circle.getAttribute('id')) 
+            return;
+        let otherCircle = this._getCircleFromHitbox( circle.isLeft ? 
+            document.getElementById('slider_circle_2_hitbox'): 
+            document.getElementById('slider_circle_1_hitbox'));
+
+        circle.circle.setAttribute('r', 3);
+        circle.circle.setAttribute('filter', '');
+        circle.label.setAttribute('visibility', 'hidden');
+        otherCircle.label.setAttribute('visibility', 'hidden');
+    }
+
+    sliderCircleDown(evt) {
+        let hitbox = evt.target;
+        let circle = this._getCircleFromHitbox(hitbox);
+
+        this.slider_dragged=circle;
+    }
+
+    sliderCircleMove(evt) {
+        if(this.slider_dragged==null) return;
+        let circle = this.slider_dragged;
+
+        let x=0;
+        this.__PT.x = evt.clientX;
+        this.__PT.y = evt.clientY;
+        let cursorpt = this.__PT.matrixTransform(this.__SVG.getScreenCTM().inverse());
+        x = cursorpt.x;
+
+        if (circle.isLeft) {
+            if (x>SLIDER_START_X+this.slider_right_position*SLIDER_LENGTH) {
+                x = SLIDER_START_X+this.slider_right_position*SLIDER_LENGTH;
+            }
+            if (x<SLIDER_START_X) {
+                x = SLIDER_START_X;
+            }
+            this.slider_left_position=(x-SLIDER_START_X+0.0)/SLIDER_LENGTH;
+
+            document.getElementById('slider_line_left').setAttribute('x2', x);
+            document.getElementById('slider_line_middle').setAttribute('x1', x);
+            document.getElementById('slider_grad').setAttribute('x1', x)
+        }
+        else {
+            if (x<SLIDER_START_X+this.slider_left_position*SLIDER_LENGTH) {
+                x = SLIDER_START_X+this.slider_left_position*SLIDER_LENGTH;
+            }
+            if (x>SLIDER_START_X+SLIDER_LENGTH) {
+                x = SLIDER_START_X+SLIDER_LENGTH;
+            }
+            this.slider_right_position=(x-SLIDER_START_X+0.0)/SLIDER_LENGTH;
+
+            document.getElementById('slider_line_middle').setAttribute('x2', x);
+            document.getElementById('slider_line_right').setAttribute('x1', x);
+            document.getElementById('slider_grad').setAttribute('x2', x);
+        }
+
+        circle.circle.setAttribute('cx', x);
+        circle.hitbox.setAttribute('cx', x);
+        circle.label.setAttribute('transform', 'translate('+x+','+SLIDER_START_Y+')');
+
+        let label_text = document.getElementById(circle.label.getAttribute('id')+'_text');
+        label_text.textContent=this.props.scaleFunction((x-SLIDER_START_X+0.0)/SLIDER_LENGTH);
+
+    }
+
+    sliderCircleRelease(evt) {
+        if (this.slider_dragged==null) return;
+        let circle = this.slider_dragged;
+
+        circle.circle.parentNode.appendChild(circle.circle);
+        circle.label.parentNode.appendChild(circle.label);
+        circle.hitbox.parentNode.appendChild(circle.hitbox);
+
+        this.slider_dragged=null;
+        this.sliderCircleLeave({target: circle.hitbox});
+        // this.sliderMouseLeave();
+        this.props.onSliderChange([this.slider_left_position, this.slider_right_position]);
+    }
+
+    //#endregion sliderEmphasis
+
+    //#region sliceGen
     generateSlices()
     {
         let ret = [];
@@ -102,7 +260,11 @@ extends React.Component
             if (!this.state.show[wordType] || 
                  this.props.data[wordType] == null) continue;
 
+            if (this.props.data[wordType]['counts'][0]==0) continue;
+
             let angle = (this.props.data[wordType]['counts'][0]+0.0)/totalWords;
+            if (angle==1.0) angle -= .000001;
+
             let color = hslToRgb(hueMap[i], 1, .25);
 
             ret.push(this.add_slice(wordType, true, color, start_angle, angle));
@@ -113,8 +275,12 @@ extends React.Component
             if (!this.state.show[wordType] || 
                  this.props.data[wordType] == null) continue;
 
+            if (this.props.data[wordType]['counts'][1]==0) continue;
+            
             let angle = (this.props.data[wordType]['counts'][1]+0.0)/totalWords;
-            let color = hslToRgb(hueMap[i], .8, .80);
+            if (angle==1.0) angle -= .000001;
+
+            let color = hslToRgb(hueMap[i], 1, .80);
 
             ret.push(this.add_slice(wordType, false, color, start_angle, angle));
             start_angle += angle;
@@ -134,17 +300,20 @@ extends React.Component
                     describeArc(CIRCLE_CENTER_X, 
                                 CIRCLE_CENTER_Y, 
                                 CIRCLE_RADIUS, 
+                                CIRCLE_INNER_RADIUS,
                                 start_angle*360, 
                                 (start_angle+angle)*360)
                 }
-                onClick={(evt) => this.handle_slice_emphasis(evt, key)}
-                onMouseEnter={(evt) => this.handle_slice_emphasis(evt, key)}
-                onMouseLeave={(evt) => this.handle_slice_emphasis(evt, key)}
+                onPointerDown ={(evt) => this.handle_slice_emphasis(evt, key)}
+                onPointerEnter={(evt) => this.handle_slice_emphasis(evt, key)}
+                onPointerLeave={(evt) => this.handle_slice_emphasis(evt, key)}
             />
         );
         return slice;
     }
+    //#endregion sliceGen
 
+    //#region labelGen
     generateLabels()
     {
         let ret = [];
@@ -263,6 +432,154 @@ extends React.Component
             </g>
         )
     }
+    //#endregion labelGen
+
+    //#region sliderGen
+    labelPath() {
+        return "M 0 0 l -15 -16.77 a 20 20 0 1 1 30 0 l -15 16.77"
+    }
+
+    genSlider() {
+        let hue = .5;
+
+        const sliderLabelStyle = {
+            textAnchor: "middle",
+            fontSize: 12,
+            fontFamily: "monospace",
+            fill: "#ffffff",
+
+        }
+        console.log("GENSLIDERS")
+        console.log(this.slider_left_position)
+        console.log(this.slider_right_position)
+        return (
+        <g id="plot_slider">
+            <line
+                id="slider_line_left"
+                x1={SLIDER_START_X}
+                y1={SLIDER_START_Y}
+                x2={SLIDER_START_X+this.slider_left_position*SLIDER_LENGTH}
+                y2={SLIDER_START_Y}
+                stroke={SLIDER_LEFT_COLOR}
+                strokeLinecap="round"
+                strokeOpacity={.2}
+                strokeWidth={5}
+            />
+            <line
+                id="slider_line_right"
+                x1={SLIDER_START_X+this.slider_right_position*SLIDER_LENGTH}
+                y1={SLIDER_START_Y}
+                x2={SLIDER_START_X+SLIDER_LENGTH}
+                y2={SLIDER_START_Y}
+                stroke={SLIDER_RIGHT_COLOR}
+                strokeLinecap="round"
+                strokeOpacity={.2}
+                strokeWidth={5}
+            />
+            <line
+                id="slider_line_middle"
+                x1={SLIDER_START_X+this.slider_left_position*SLIDER_LENGTH}
+                y1={SLIDER_START_Y}
+                x2={SLIDER_START_X+this.slider_right_position*SLIDER_LENGTH}
+                y2={SLIDER_START_Y}
+                stroke="url(#slider_grad)"
+                strokeOpacity={.2}
+                strokeLinecap="round"
+                strokeWidth={5}
+            />
+            <line
+                id="slider_hitbox"
+                x1={SLIDER_START_X}
+                y1={SLIDER_START_Y}
+                x2={SLIDER_START_X+SLIDER_LENGTH}
+                y2={SLIDER_START_Y}
+                stroke={"#00000000"}
+                strokeLinecap="round"
+                strokeWidth={12}
+                onPointerEnter={(evt) => this.sliderMouseEnter()}
+                onPointerLeave={(evt) => this.sliderMouseLeave()}
+            />
+            <circle 
+                id="slider_circle_1"
+                cx={SLIDER_START_X+this.slider_left_position*SLIDER_LENGTH}
+                cy={SLIDER_START_Y}
+                r={3}
+                fill={SLIDER_LEFT_COLOR}
+            />
+            <g 
+                id="slider_circle_1_label"
+                visibility='hidden'
+                transform={'translate('+(SLIDER_START_X+this.slider_left_position*SLIDER_LENGTH)+','+SLIDER_START_Y+')'}
+            >
+                <path 
+                    id='slider_circle_1_label_path'
+                    d={this.labelPath()}
+                    fill={SLIDER_LEFT_COLOR}
+                    filter="url(#dropShadow_slice)"
+                />
+                <text 
+                    id="slider_circle_1_label_text"
+                    style={sliderLabelStyle}
+                    x={0}
+                    y={-25}
+                >
+                    {this.props.scaleFunction(this.slider_left_position)}
+                </text>
+            </g>
+            <circle
+                id="slider_circle_1_hitbox"
+                cx={SLIDER_START_X+this.slider_left_position*SLIDER_LENGTH}
+                cy={SLIDER_START_Y}
+                fill="#00000000"
+                r={6}
+                onPointerEnter={(evt) => this.sliderCircleEnter(evt)}
+                onPointerLeave={(evt) => this.sliderCircleLeave(evt)}
+                onPointerDown= {(evt) => this.sliderCircleDown(evt) }
+            />
+            
+            <circle 
+                id="slider_circle_2"
+                cx={SLIDER_START_X+this.slider_right_position*SLIDER_LENGTH}
+                cy={SLIDER_START_Y}
+                r={3}
+                fill={SLIDER_RIGHT_COLOR}
+            />
+            <g 
+                id="slider_circle_2_label"
+                visibility='hidden'
+                transform={'translate('+(SLIDER_START_X+this.slider_right_position*SLIDER_LENGTH)+','+SLIDER_START_Y+')'}
+            >
+                <path 
+                    id='slider_circle_2_label_path'
+                    d={this.labelPath()}
+                    fill={SLIDER_RIGHT_COLOR}
+                    filter="url(#dropShadow_slice)"
+                />
+                <text
+                    id="slider_circle_2_label_text"
+                    style={sliderLabelStyle}
+                    x={0}
+                    y={-25}
+                >
+                    {this.props.scaleFunction(this.slider_right_position)}
+                </text>
+            </g>
+            <circle
+                id="slider_circle_2_hitbox"
+                cx={SLIDER_START_X+this.slider_right_position*SLIDER_LENGTH}
+                cy={SLIDER_START_Y}
+                fill="#00000000"
+                r={6}
+                onPointerEnter={(evt) => this.sliderCircleEnter(evt)}
+                onPointerLeave={(evt) => this.sliderCircleLeave(evt)}
+                onPointerDown= {(evt) => this.sliderCircleDown(evt) }
+            />
+        </g>
+        );
+    }
+
+
+    //#endregion sliderGen
 
     knownCount()
     {
@@ -286,6 +603,15 @@ extends React.Component
         return count;
     }
 
+    componentDidMount()
+    {
+        document.addEventListener("pointerup", (event) => this.sliderCircleRelease(event) );
+        document.addEventListener("pointermove", (evt) => this.sliderCircleMove(evt))
+        let svg = document.getElementById('FrequentWordsCard');
+        this.__SVG = svg;
+        this.__PT = svg.createSVGPoint();
+    }
+
     render()
     {
         const headingStyle = {
@@ -306,14 +632,49 @@ extends React.Component
             "textAnchor": "middle",
             "fontFamily": ["Impact", "Arial Black", "Gadget", "sans-serif"]
         }
+        const sliderNumberStyle = {
+            fill: "#ffffff",
+            "fontSize": 10,
+            "textAnchor": "middle",
+            "fontFamily": ['monospace']
+        }
 
         return (
             <svg
             xmlns="http://www.w3.org/2000/svg"
-            id="svg8"
+            id="FrequentWordsCard"
             version="1.1" 
             viewBox="0 0 506 306">
             <defs id="filters">
+                <linearGradient 
+                    id="slider_grad" 
+                    x1={SLIDER_START_X}
+                    y1={SLIDER_START_Y}
+                    x2={SLIDER_START_X+SLIDER_LENGTH}
+                    y2={SLIDER_START_Y}
+                    gradientUnits="userSpaceOnUse"
+                >
+                    <stop 
+                        id="slider_grad_stop1"
+                        offset="0%"
+                        stopColor={SLIDER_LEFT_COLOR}
+                    />
+                    <stop 
+                        id="slider_grad_stop2"
+                        offset="100%"
+                        stopColor={SLIDER_RIGHT_COLOR}
+                    />
+                </linearGradient>
+                <radialGradient id="background_grad" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+                    <stop 
+                        offset="50%"
+                        stopColor='#ffffff'
+                    />
+                    <stop 
+                        offset="100%"
+                        stopColor='#fdfdfd'
+                    />
+                </radialGradient>
                 <filter id="dropShadow_bg">
                     <feFlood floodColor="#3D4574" floodOpacity="0.5" result="offsetColor"/>
                     <feGaussianBlur in="SourceAlpha" stdDeviation="1.3" />
@@ -334,6 +695,16 @@ extends React.Component
                         <feMergeNode in="SourceGraphic" />
                     </feMerge>
                 </filter>
+                <filter id="dropShadow_circle">
+                    <feFlood floodColor="#3D4574" floodOpacity="0.2" result="offsetColor"/>
+                    <feGaussianBlur in="SourceAlpha" stdDeviation="1.3" />
+                    <feOffset dx=".5" dy=".5" result="offsetBlur"/>
+                    <feComposite in="offsetColor" in2="offsetBlur" operator="in"/>
+                    <feMerge>
+                        <feMergeNode />
+                        <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                </filter>
                 <filter id="blurABit">
                     <feGaussianBlur in="SouceImage" stdDeviation=".1"/>
                 </filter>
@@ -345,7 +716,7 @@ extends React.Component
                 >
                     <rect
                         id="background_sheet"
-                        fill="#f0f0f0"
+                        fill='url(#background_grad)'
                         filter="url(#dropShadow_bg)"
                         width="500"
                         height="300"
@@ -353,7 +724,7 @@ extends React.Component
                         rx="20"
                         y="0"
                         x="0" 
-                        onClick={(evt) => this.clear_click()}
+                        onPointerDown={(evt) => this.clear_click()}
                     />
                 </g>
                 <text id="heading" 
@@ -385,16 +756,13 @@ extends React.Component
                     <circle cx={CIRCLE_CENTER_X} 
                             cy={CIRCLE_CENTER_Y} 
                             r= {CIRCLE_RADIUS} 
-                            fill="#d9d9d9" />
+                            fill="#f2f2f2" />
                     {this.generateSlices()}
                 </g>
                 <g id="plot_labels">  
-                    <circle cx={CIRCLE_CENTER_X}
-                            cy={CIRCLE_CENTER_Y}
-                            r="60" 
-                            fill="#f2f2f2" />
                     {this.generateLabels()}
                 </g>
+                {this.genSlider()}
             </g>
         </svg>
         )
@@ -445,16 +813,19 @@ function hslToRgb(h, s, l)
     return "#" + r + g + b;
 } 
 
-function describeArc(x, y, radius, startAngle, endAngle)
+function describeArc(x, y, radius, innerRadius, startAngle, endAngle)
 {
     var start = polarToCartesian(x, y, radius, endAngle);
     var end = polarToCartesian(x, y, radius, startAngle);
+    var start2 = polarToCartesian(x, y, innerRadius, endAngle);
+    var end2 = polarToCartesian(x, y, innerRadius, startAngle);
     var largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
     var d = [
-        "M", x, y,
-        "L", start.x, start.y, 
+        "M", start.x, start.y, 
         "A", radius, radius, 0, largeArcFlag, 0, end.x, end.y,
-        "L", x, y
+        "L", end2.x, end2.y,
+        "A", innerRadius, innerRadius, 0, largeArcFlag, 1, start2.x, start2.y,
+        "L", start.x, start.y
     ].join(" ");
     return d;       
 }
@@ -467,184 +838,3 @@ function polarToCartesian(centerX, centerY, radius, angleInDegrees)
         y: centerY + (radius * Math.sin(angleInRadians))
     };
 }
-
-
-{/* <script type="text/javascript"><![CDATA[
-        
-    // Hue is float 0-1. size is in ratio of cirle (1/4 = 90deg)
-    function add_slice(wordType, hue, size) {
-        if (typeof add_slice.end == 'undefined') add_slice.end = -.25;
-        start = add_slice.end;
-        end   = add_slice.end + size + .00075;
-        color = wordType.charAt(0)=='u' ? hslToRgb(hue, 1.0, .75) : hslToRgb(hue, 1.0, .2)
-
-        let slice     = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        let text_main = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        let text_alt  = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        let text_desc = document.createElementNS("http://www.w3.org/2000/svg", "text");
-
-        slice.setAttribute('id', wordType);
-        slice.setAttribute('fill', color);
-        slice.setAttribute('d', describeArc(325, 140, 110, start*360, end*360));
-
-        slice.addEventListener('mouseover', (evt) => handle_slice_emphasis(evt, wordType) );
-        slice.addEventListener('mouseout',  (evt) => handle_slice_emphasis(evt, wordType) );
-        slice.addEventListener('click',     (evt) => handle_slice_emphasis(evt, wordType) );
-
-        text_main.setAttribute('id', wordType+'_text_main');
-        text_main.setAttribute('fill', hslToRgb(hue, 1.0, .1));
-        text_main.setAttribute('filter', 'dropShadow_slice');
-        text_main.setAttribute('x', 325);
-        text_main.setAttribute('y', 140);
-        text_main.setAttribute('dy', '.4em');
-        text_main.setAttribute('text-anchor', 'middle');
-        text_main.setAttribute('font-family', '"Impact", "Arial Black", "Gadget", "sans-serif"');
-        text_main.setAttribute('font-size', 32);
-        text_main.textContent  = "100%"
-        text_main.setAttribute('visibility', 'hidden');
-
-        text_alt.setAttribute('id', wordType+'_text_alt');
-        text_alt.setAttribute('fill', hslToRgb(hue, 1.0, .1)+"80");
-        text_alt.setAttribute('filter', 'dropShadow_slice');
-        text_alt.setAttribute('x', 325);
-        text_alt.setAttribute('y', 120);
-        text_alt.setAttribute('text-anchor', 'middle');
-        text_alt.setAttribute('font-family', '"Impact", "Arial Black", "Gadget", "sans-serif"');
-        text_alt.setAttribute('font-size', 12);
-        text_alt.textContent  = "32099"
-        text_alt.setAttribute('visibility', 'hidden');
-
-        text_desc.setAttribute('id', wordType+'_text_desc');
-        text_desc.setAttribute('fill', hslToRgb(hue, 1.0, .1)+"80");
-        text_desc.setAttribute('filter', 'dropShadow_slice');
-        text_desc.setAttribute('x', 325);
-        text_desc.setAttribute('y', 165);
-        text_desc.setAttribute('text-anchor', 'middle');
-        text_desc.setAttribute('textLength', 100);
-        text_desc.setAttribute('font-family', '"Impact", "Arial Black", "Gadget", "sans-serif"');
-        text_desc.setAttribute('font-size', 8);
-        text_desc.textContent  = "Unknown Adjective Pronouns"
-        text_desc.setAttribute('visibility', 'hidden');
-
-        document.getElementById('plot_labels').appendChild(text_main);
-        document.getElementById('plot_labels').appendChild(text_alt);
-        document.getElementById('plot_labels').appendChild(text_desc);        
-        document.getElementById('plot').appendChild(slice);
-
-        add_slice.end = end - .00075;
-    }
-
-    // returns rgb string.
-    function hslToRgb(h, s, l) {
-        var r, g, b;
-
-        if(s == 0) {
-            r = g = b = l; // achromatic
-        }
-        else {
-            var hue2rgb = function hue2rgb(p, q, t){
-                if(t < 0) t += 1;
-                if(t > 1) t -= 1;
-                if(t < 1/6) return p + (q - p) * 6 * t;
-                if(t < 1/2) return q;
-                if(t < 2/3) return p + (q - p) * (2/3 - t) * 6;
-                return p;
-            }
-
-            var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-            var p = 2 * l - q;
-            r = hue2rgb(p, q, h + 1/3);
-            g = hue2rgb(p, q, h);
-            b = hue2rgb(p, q, h - 1/3);
-        }
-        r = Math.round(r * 255).toString(16);
-        r = r.length<2 ? r.concat("0") : r;
-        g = Math.round(g * 255).toString(16);
-        g = g.length<2 ? g.concat("0") : g;
-        b = Math.round(b * 255).toString(16);
-        b = b.length<2 ? b.concat("0") : b;
-
-        return "#" + r + g + b;
-    } 
-
-    function clear_click() {
-        if (handle_slice_emphasis.clicked_slice != null && 
-            handle_slice_emphasis.clicked_slice != ""
-            )
-            deemphasize_slice(handle_slice_emphasis.clicked_slice);
-        handle_slice_emphasis.click_enabled = false;
-        handle_slice_emphasis.clicked_slice = "";
-    }
-
-    function handle_slice_emphasis(evt, wordType) {
-        if (typeof handle_slice_emphasis.click_enabled == 'undefined') 
-            handle_slice_emphasis.click_enabled = false;
-        if (typeof handle_slice_emphasis.clicked_slice == 'undefined') 
-            handle_slice_emphasis.clicked_slice = "";
-
-        switch (evt.type) {
-            case 'mouseover':
-                if (!handle_slice_emphasis.click_enabled) 
-                    emphasize_slice(wordType);
-                break;
-
-            case 'mouseout':
-                if (!handle_slice_emphasis.click_enabled) 
-                    deemphasize_slice(wordType);
-                break;
-
-            case 'click':
-                if (handle_slice_emphasis.click_enabled) {
-                    if (handle_slice_emphasis.clicked_slice == wordType) {
-                        clear_click();
-                    }
-                    else {
-                        deemphasize_slice(handle_slice_emphasis.clicked_slice);
-                        handle_slice_emphasis.clicked_slice = wordType;
-                        emphasize_slice(wordType);
-                    }
-                }
-                else {
-                    handle_slice_emphasis.click_enabled = true;
-                    handle_slice_emphasis.clicked_slice = wordType;
-                    emphasize_slice(wordType);
-                }
-                break;
-
-            default:
-                break;
-        }
-    }
-
-    function emphasize_slice(wordType) {
-        let slice     = document.getElementById(wordType);
-        let text_main = document.getElementById(wordType+'_text_main');
-        let text_alt  = document.getElementById(wordType+'_text_alt');
-        let text_desc = document.getElementById(wordType+'_text_desc');
-
-        slice.setAttribute('filter', 'url(#dropShadow_slice)');
-        slice.setAttribute('transform', 'translate(-6.6, -3.0) scale(1.02, 1.02)');
-
-        text_main.setAttribute('visibility', 'visible');
-        text_alt.setAttribute('visibility', 'visible');
-        text_desc.setAttribute('visibility', 'visible');
-
-        slice.parentNode.appendChild(slice);
-    }
-
-    function deemphasize_slice(wordType) {
-        let slice     = document.getElementById(wordType);
-        let text_main = document.getElementById(wordType+'_text_main');
-        let text_alt  = document.getElementById(wordType+'_text_alt');
-        let text_desc = document.getElementById(wordType+'_text_desc');
-
-        slice.setAttribute('filter', 'null');
-        slice.setAttribute('transform', 'translate(0, 0)');
-
-        text_main.setAttribute('visibility', 'hidden');
-        text_alt.setAttribute('visibility', 'hidden');
-        text_desc.setAttribute('visibility', 'hidden');
-    }
-
-
-    ]]></script> */}

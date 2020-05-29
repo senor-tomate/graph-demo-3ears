@@ -8,7 +8,7 @@ import axios from 'axios'
 // import './FrequentWordsPiePlot.css';
 import FrequentWordsCard from './FrequentWordsCard';
 
-let SLIDER_SCALE_BASE   = 1.0/2.5;
+let SLIDER_SCALE_BASE   = 1.0/2.25;
 
 export default
 class FrequentWordsPiePlot
@@ -22,15 +22,15 @@ extends React.Component
     {
         super(props)
         this.uid = props.user_id;
-        this.maxWordAmount=-1;
         this.wordRange = []
 
         this.state = {
             data: {},
+            maxWordAmount: -1
         }
 
-        this.fetchData();
         this.calibrateSliders();
+        this.fetchData();
     }
 
     calibrateSliders()
@@ -48,7 +48,8 @@ extends React.Component
             for (let key in data) {
                 maxCount += data[key];
             }
-            this.maxWordAmount=maxCount;
+            // console.log("GRAPH MAX WORD AMOUNT FETCHED");
+            this.setState({maxWordAmount: maxCount});
         });
     }
 
@@ -64,7 +65,7 @@ extends React.Component
             'https://itl.3ears.com/api/learner_data/frequent_words/statistic',
             { params: params } 
         ).then( ({ data }) => {
-            // console.log("DATA FETCHED");
+            // console.log("GRAPH DATA FETCHED");
             this.setState({data: data});
         });
     }
@@ -88,16 +89,16 @@ extends React.Component
         };
 
         const wordTypeDict = {
-            'adj':      "Adjectives",
-            'noun':     "Nouns",
-            'verb':     "Verbs",
-            'pron':     "Pronouns",
-            'adjpron':  "Adjective Pronouns",
-            'prep':     "Prepositions",
-            'adv':      "Adverbs",
-            'ord':      "Ordinals",
-            'card':     "Cardinals",
-            'misc':     "Misclaneous Words"
+            'adj':     "Adjectives",
+            'noun':    "Nouns",
+            'verb':    "Verbs",
+            'pron':    "Pronouns",
+            'adjpron': "Adjective Pronouns",
+            'prep':    "Prepositions",
+            'adv':     "Adverbs",
+            'ord':     "Ordinals",
+            'card':    "Cardinals",
+            'misc':    "Miscellaneous Words"
         }
 
         for (let item in data) {
@@ -109,8 +110,6 @@ extends React.Component
             let type = ! unknown ? item : item.substr(1);
             label += wordTypeDict[type];
             
-            // console.log("ret[type]=" + ret[type])
-            // console.log(ret[type]);
             if (ret[type] == null) {
                 ret[type] = {
                     wordType: label,
@@ -125,24 +124,25 @@ extends React.Component
         return ret;
     }
 
+    scaleFunction(num) {
+        let ret = Math.floor(this.state.maxWordAmount**Math.pow(num, SLIDER_SCALE_BASE));
+        return ret;
+    }
+
     // Values: [] with low and high (0-1 range)
     handleSliderChange(values)
     {
-        let scaleFunction = (num) => 
-            Math.floor(this.maxWordAmount**Math.pow(num, SLIDER_SCALE_BASE));
-
-        this.wordRange[0] = scaleFunction(value[0]);
-        this.wordRange[1] = scaleFunction(value[1]);
+        this.wordRange[0] = this.scaleFunction(values[0]);
+        this.wordRange[1] = this.scaleFunction(values[1]);
         this.fetchData();
     }
 
     render()
     {
-        // console.log("PARENT RENDERING");
-        // console.log(this.parseData(this.state.data));
         return <FrequentWordsCard 
                     data={this.parseData(this.state.data)}
                     onSliderChange={(values)=>this.handleSliderChange(values)}
+                    scaleFunction={(num) => this.scaleFunction(num)}
                 />
     }
 }
