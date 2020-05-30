@@ -15,8 +15,25 @@ const SLIDER_LENGTH          = SLIDER_TO_CIRCLE_RATIO * CIRCLE_RADIUS * 2;
 const SLIDER_START_X         = CIRCLE_CENTER_X-SLIDER_LENGTH/2;
 const SLIDER_START_Y         = CIRCLE_CENTER_Y + CIRCLE_RADIUS + SLIDER_TO_CIRCLE_PAD;
 
-const SLIDER_LEFT_COLOR      = hslToRgb(210.0/360, 1, .7);
-const SLIDER_RIGHT_COLOR     = hslToRgb(280.0/360, 1, .7);
+const KNOWN_SATURATION   = .8;
+const UNKNOWN_SATURATION = .6;
+const KNOWN_LIGHTNESS    = .4;
+const UNKNOWN_LIGHTNESS  = .8;
+
+const SLIDER_LEFT_COLOR  = hslToRgb(210.0/360, 1, .7);
+const SLIDER_RIGHT_COLOR = hslToRgb(280.0/360, 1, .7);
+
+const HEADING_START_X     = 20;
+const HEADING_START_Y     = 25;
+const HEADING_LENGTH      = 200;
+const EQUATION_START_X    = 20;
+const EQUATION_START_Y    = 90;
+const EQUATION_LENGTH_1   = 80;
+const EQUATION_LENGTH_2   = 30;
+const EQUATION_LENGTH_3   = 90;
+const EXPLANATION_START_X = 20;
+const EXPLANATION_START_Y = 150;
+const EXPLANATION_LENGTH  = 180;
 
 export default
 class FrequentWordsCard
@@ -265,7 +282,7 @@ extends React.Component
             let angle = (this.props.data[wordType]['counts'][0]+0.0)/totalWords;
             if (angle==1.0) angle -= .000001;
 
-            let color = hslToRgb(hueMap[i], 1, .25);
+            let color = hslToRgb(hueMap[i], KNOWN_SATURATION, KNOWN_LIGHTNESS);
 
             ret.push(this.add_slice(wordType, true, color, start_angle, angle));
             start_angle += angle;
@@ -280,7 +297,7 @@ extends React.Component
             let angle = (this.props.data[wordType]['counts'][1]+0.0)/totalWords;
             if (angle==1.0) angle -= .000001;
 
-            let color = hslToRgb(hueMap[i], 1, .80);
+            let color = hslToRgb(hueMap[i], UNKNOWN_SATURATION, UNKNOWN_LIGHTNESS);
 
             ret.push(this.add_slice(wordType, false, color, start_angle, angle));
             start_angle += angle;
@@ -449,9 +466,6 @@ extends React.Component
             fill: "#ffffff",
 
         }
-        console.log("GENSLIDERS")
-        console.log(this.slider_left_position)
-        console.log(this.slider_right_position)
         return (
         <g id="plot_slider">
             <line
@@ -578,7 +592,6 @@ extends React.Component
         );
     }
 
-
     //#endregion sliderGen
 
     knownCount()
@@ -615,29 +628,34 @@ extends React.Component
     render()
     {
         const headingStyle = {
-            "fill": "#333333",
-            "fontSize": 22,
+            "fill": "#404040",
+            "fontSize": 28,
             "textAnchor": "start",
             "fontFamily": ["Impact", "Arial Black", "Gadget", "sans-serif"]
         }
         const numberStyle = {
-            "fill": "#404040",
-            "fontSize": 60,
-            "textAnchor": "middle",
+            "fill": hslToRgb(0, 0, KNOWN_LIGHTNESS),
+            "fontSize": 36,
             "fontFamily": ["Impact", "Arial Black", "Gadget", "sans-serif"]
         }
-        const numberSmallStyle = {
-            "fill": "#999999",
-            "fontSize": 12,
-            "textAnchor": "middle",
+        const numberStyle2 = {
+            "fill": hslToRgb(0, 0, UNKNOWN_LIGHTNESS),
+            "fontSize": 16,
             "fontFamily": ["Impact", "Arial Black", "Gadget", "sans-serif"]
         }
-        const sliderNumberStyle = {
-            fill: "#ffffff",
-            "fontSize": 10,
-            "textAnchor": "middle",
-            "fontFamily": ['monospace']
+        const explanationStyle = {
+            "fill": "#bfbfbf",
+            "fontSize": 16,
+            "fontFamily": ['Arial', 'Helvetica', 'sans-serif'],
         }
+
+        const selectedRange = [
+            this.props.scaleFunction(this.slider_left_position),
+            this.props.scaleFunction(this.slider_right_position),            
+        ]
+        const selectedWords = this.allCount();
+        const knownWords = this.knownCount();
+        const altText = selectedRange[0] != 1;
 
         return (
             <svg
@@ -728,30 +746,65 @@ extends React.Component
                     />
                 </g>
                 <text id="heading" 
-                    x="20" 
-                    y="30" 
+                    x={HEADING_START_X} 
+                    y={HEADING_START_Y}
                     dy=".3em" 
-                    textLength="200" 
+                    textLength={HEADING_LENGTH} 
                     lengthAdjust="spacingAndGlyphs"
                     style={headingStyle}
                 >
-                    Most Frequent Known Words
+                    Frequent Known Words
                 </text>
-                <text id="total_known" 
-                    x="120" 
-                    y="110" 
-                    style={numberStyle}
-                >
-                    {this.knownCount()}
-                </text>
-                <text id="total" 
-                    x="120"
-                    y="110"
-                    dy="2em"
-                    style={numberSmallStyle}
-                >
-                    {"Total words selected: " + this.allCount()}
-                </text>
+                <g id="equation" >
+                    {/* <text style={numberStyle} x={EQUATION_START_X} 
+                          y={EQUATION_START_Y} textLength={EQUATION_LENGTH_1}
+                          lengthAdjust="spacingAndGlyphs"
+                    >
+                        {knownWords}/
+                    </text>
+                    <text style={numberStyle2} x={EQUATION_START_X+EQUATION_LENGTH_1} 
+                          y={EQUATION_START_Y} textLength={EQUATION_LENGTH_2}
+                          lengthAdjust="spacingAndGlyphs"
+                    >
+                        {selectedWords}
+                    </text>
+                    <text style={numberStyle} 
+                          x={EQUATION_START_X+EQUATION_LENGTH_1+EQUATION_LENGTH_2} 
+                          y={EQUATION_START_Y} dy="-.25em" textAnchor="end">
+                        =
+                    </text>
+                    <text style={numberStyle} x={EQUATION_START_X+EQUATION_LENGTH_1+EQUATION_LENGTH_2} 
+                          y={EQUATION_START_Y} dx="7" textLength={EQUATION_LENGTH_3}
+                          lengthAdjust="spacingAndGlyphs">
+                        {(knownWords*100.0/selectedWords).toFixed(2)}%
+                    </text> */}
+                    <text style={numberStyle} x={EQUATION_START_X} 
+                          y={EQUATION_START_Y} 
+                    >
+                        {knownWords}/{selectedWords}=
+                    </text>
+                    <text style={numberStyle} x={EQUATION_START_X}
+                          y={EQUATION_START_Y} dy="1em" >
+                        {(knownWords*100.0/selectedWords).toFixed(2)}%
+                    </text>
+                </g>
+                <g id="explanation" style={explanationStyle}>
+                    <text x={EXPLANATION_START_X} y={EXPLANATION_START_Y} 
+                          dy="0em" textLength={EXPLANATION_LENGTH}>
+                        You know {(knownWords*100.0/selectedWords).toFixed(2)}% ({knownWords} word{knownWords==1 ? "" : "s"})
+                    </text>
+                    <text x={EXPLANATION_START_X} y={EXPLANATION_START_Y} 
+                          dy="1em" textLength={EXPLANATION_LENGTH}>
+                        of the {altText ? 
+                            [selectedRange[0], "to", selectedRange[1], ""].join(" ") :
+                            ["top", selectedWords, ""].join(" ")
+                        }
+                        most
+                    </text>
+                    <text x={EXPLANATION_START_X} y={EXPLANATION_START_Y} dy="2em">
+                        frequent words.
+                    </text>
+                </g>
                 <g id="plot">
                     <circle cx={CIRCLE_CENTER_X} 
                             cy={CIRCLE_CENTER_Y} 
